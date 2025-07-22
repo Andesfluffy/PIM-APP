@@ -45,7 +45,7 @@ jobs:
           app_location: "./frontend"
           api_location: "./backend/functions"
           # output_location: "build"
-          output_location: "frontend/dist"
+          output_location: "frontend/build"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
