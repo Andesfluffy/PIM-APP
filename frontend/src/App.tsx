@@ -2,8 +2,8 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { Loader2, Plus, Edit3, Trash2, Save, X, User, LogOut, StickyNote, Users, CheckSquare } from 'lucide-react';
 
 // API Configuration
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-function-app.azurewebsites.net/api';
-
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-function-app.azurewebsites.net/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://thankful-smoke-06c73ee03.1.azurestaticapps.net/api';
 // API Service
 class ApiService {
   constructor() {
