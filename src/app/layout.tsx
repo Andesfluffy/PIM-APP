@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import BackButton from "@/components/BackButton";
+import { AuthProvider } from "@/context/AuthContext";
 
 <BackButton />;
 
@@ -22,7 +23,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-white`}
       >
-        {children}
+        <AuthProvider>{children}</AuthProvider>
       </body>
     </html>
   );

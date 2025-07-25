@@ -4,8 +4,14 @@ import { Task, useTasks } from "@/hooks/useTasks";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const Tasks = () => {
-  const { tasks, createTask, updateTask, deleteTask } = useTasks("");
+// ✅ Props typing
+type TasksProps = {
+  userId: string;
+  onBackToDashboard: () => void;
+};
+
+const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
+  const { tasks, createTask, updateTask, deleteTask } = useTasks(userId);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [newTask, setNewTask] = useState({
@@ -20,12 +26,17 @@ const Tasks = () => {
 
   const handleCreate = () => {
     if (newTask.title.trim()) {
-      createTask(
-        newTask.title,
-        newTask.description,
-        newTask.priority,
-        newTask.dueDate ? new Date(newTask.dueDate) : undefined
-      );
+      createTask({
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        dueDate: newTask.dueDate
+          ? new Date(newTask.dueDate).toISOString()
+          : undefined,
+        status: "pending", // or whatever default you use
+        userId, // pass from props
+      });
+
       setNewTask({
         title: "",
         description: "",
@@ -42,8 +53,11 @@ const Tasks = () => {
         title: newTask.title,
         description: newTask.description,
         priority: newTask.priority,
-        dueDate: newTask.dueDate ? new Date(newTask.dueDate) : undefined,
+        dueDate: newTask.dueDate
+          ? new Date(newTask.dueDate).toISOString()
+          : undefined,
       });
+
       setEditingTask(null);
       setNewTask({
         title: "",
@@ -61,7 +75,9 @@ const Tasks = () => {
       title: task.title,
       description: task.description,
       priority: task.priority,
-      dueDate: task.dueDate ? task.dueDate.toISOString().split("T")[0] : "",
+      dueDate: task.dueDate
+        ? new Date(task.dueDate).toISOString().split("T")[0]
+        : "",
     });
     setIsCreating(true);
   };
@@ -77,10 +93,9 @@ const Tasks = () => {
     updateTask(task.id, { status: nextStatus });
   };
 
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "all") return true;
-    return task.status === filter;
-  });
+  const filteredTasks = tasks.filter((task) =>
+    filter === "all" ? true : task.status === filter
+  );
 
   const getStatusColor = (status: Task["status"]) => {
     switch (status) {
@@ -259,14 +274,18 @@ const Tasks = () => {
               </div>
               {task.dueDate && (
                 <span className="text-white/50 text-xs">
-                  Due: {task.dueDate.toLocaleDateString()}
+                  Due: {new Date(task.dueDate).toLocaleDateString()}
                 </span>
               )}
             </div>
 
             <div className="flex justify-between items-center text-xs text-white/50">
-              <span>Created: {task.createdAt.toLocaleDateString()}</span>
-              <span>Updated: {task.updatedAt.toLocaleDateString()}</span>
+              <span>
+                Created: {new Date(task.createdAt).toLocaleDateString()}
+              </span>
+              <span>
+                Updated: {new Date(task.updatedAt).toLocaleDateString()}
+              </span>
             </div>
           </motion.div>
         ))}
@@ -278,6 +297,16 @@ const Tasks = () => {
               : `No ${filter.replace("-", " ")} tasks.`}
           </div>
         )}
+      </div>
+
+      {/* ✅ Back Button */}
+      <div className="mt-6">
+        <button
+          onClick={onBackToDashboard}
+          className="text-purple-400 hover:text-purple-200 text-sm underline"
+        >
+          ← Back to Dashboard
+        </button>
       </div>
     </div>
   );

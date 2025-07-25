@@ -4,9 +4,15 @@ import { Contact, useContacts } from "@/hooks/useContacts";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const Contacts = () => {
+// ✅ Props definition
+type ContactsProps = {
+  userId: string;
+  onBackToDashboard: () => void;
+};
+
+const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   const { contacts, createContact, updateContact, deleteContact } =
-    useContacts("");
+    useContacts(userId);
   const [isCreating, setIsCreating] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [newContact, setNewContact] = useState({
@@ -18,11 +24,12 @@ const Contacts = () => {
 
   const handleCreate = () => {
     if (newContact.name.trim() && newContact.email.trim()) {
-      createContact(
-        newContact.name,
-        newContact.email,
-        newContact.phone || undefined
-      );
+      createContact({
+        name: newContact.name,
+        email: newContact.email,
+        phone: newContact.phone || undefined,
+        userId,
+      });
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
     }
@@ -30,12 +37,12 @@ const Contacts = () => {
 
   const handleUpdate = () => {
     if (editingContact && newContact.name.trim() && newContact.email.trim()) {
-      updateContact(
-        editingContact.id,
-        newContact.name,
-        newContact.email,
-        newContact.phone || undefined
-      );
+      updateContact(editingContact.id, {
+        name: newContact.name,
+        email: newContact.email,
+        phone: newContact.phone || undefined,
+        userId,
+      });
       setEditingContact(null);
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
@@ -201,8 +208,12 @@ const Contacts = () => {
                   )}
                 </div>
                 <div className="flex justify-between items-center text-xs text-white/50">
-                  <span>Created: {contact.createdAt.toLocaleDateString()}</span>
-                  <span>Updated: {contact.updatedAt.toLocaleDateString()}</span>
+                  <span>
+                    Created: {new Date(contact.createdAt).toLocaleDateString()}
+                  </span>
+                  <span>
+                    Updated: {new Date(contact.updatedAt).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
             </div>
@@ -217,7 +228,18 @@ const Contacts = () => {
           </div>
         )}
       </div>
+
+      {/* ✅ Back Button */}
+      <div className="mt-6">
+        <button
+          onClick={onBackToDashboard}
+          className="text-purple-400 hover:text-purple-200 text-sm underline"
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
     </div>
   );
 };
+
 export default Contacts;
