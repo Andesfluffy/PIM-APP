@@ -4,22 +4,24 @@ import Note from "@/lib/models/Note";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   await connectToDatabase();
-  const note = await Note.findById(params.id);
+  const note = await Note.findById(id);
   if (!note) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(note);
 }
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   await connectToDatabase();
   const { title, content } = await req.json();
   const updated = await Note.findByIdAndUpdate(
-    params.id,
+    id,
     { title, content, updatedAt: new Date() },
     { new: true }
   );
@@ -28,9 +30,10 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await context.params;
   await connectToDatabase();
-  await Note.findByIdAndDelete(params.id);
+  await Note.findByIdAndDelete(id);
   return new Response(null, { status: 204 });
 }

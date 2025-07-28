@@ -158,7 +158,7 @@ export default function HomePage() {
                   animate={{ y: 0, opacity: 1 }}
                 >
                   <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-fuchsia-200 mb-4">
-                    Welcome back, {user.name.split(" ")[0]}!
+                    Welcome back, {(user?.name ?? "User").split(" ")[0]}!
                   </h1>
                   <h2 className="text-xl md:text-2xl text-white/80 mb-12 font-light">
                     What would you like to manage today?
@@ -232,9 +232,21 @@ export default function HomePage() {
                 </button>
 
                 <div className="">
-                  {view === "notes" && <Notes />}
-                  {view === "tasks" && <Tasks userId={user.id} />}
-                  {view === "contacts" && <Contacts userId={user.id} />}
+                  {view === "notes" && (
+                    <Notes onBackToDashboard={() => setView("dashboard")}/>
+                  )}
+                  {view === "tasks" && (
+                    <Tasks
+                      userId={user.id}
+                      onBackToDashboard={() => setView("dashboard")}
+                    />
+                  )}
+                  {view === "contacts" && (
+                    <Contacts
+                      userId={user.id}
+                      onBackToDashboard={() => setView("dashboard")}
+                    />
+                  )}
                 </div>
               </motion.div>
             )}
@@ -269,9 +281,15 @@ export default function HomePage() {
                 </div>
 
                 <div className="">
-                  {view === "notes" && <Notes />}
-                  {view === "tasks" && <Tasks />}
-                  {view === "contacts" && <Contacts />}
+                  {view === "notes" && (
+                    <Notes onBackToDashboard={() => setView("dashboard")}/>
+                  )}
+                  {view === "tasks" && (
+                    <Tasks onBackToDashboard={() => setView("dashboard")} userId="" />
+                  )}
+                  {view === "contacts" && (
+                    <Contacts onBackToDashboard={() => setView("dashboard")} />
+                  )}
                 </div>
               </motion.div>
             )}

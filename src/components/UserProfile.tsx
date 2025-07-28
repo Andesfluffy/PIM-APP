@@ -1,7 +1,22 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 
-export default function UserProfile({ user, onSignOut }) {
+interface User {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  photoURL?: string | null;
+  metadata?: {
+    creationTime?: string;
+    lastSignInTime?: string;
+  };
+}
+
+interface UserProfileProps {
+  user: User;
+  onSignOut: () => Promise<void> | void;
+}
+export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
@@ -17,7 +32,7 @@ export default function UserProfile({ user, onSignOut }) {
     }
   };
 
-  const getInitials = (name) => {
+  const getInitials = (name: string) => {
     if (!name) return "U";
     return name
       .split(" ")

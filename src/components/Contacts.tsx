@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 // ✅ Props definition
 type ContactsProps = {
-  userId: string;
+  userId?: string;
   onBackToDashboard: () => void;
 };
 
@@ -28,7 +28,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         name: newContact.name,
         email: newContact.email,
         phone: newContact.phone || undefined,
-        userId,
+        userId: userId || "",
       });
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
