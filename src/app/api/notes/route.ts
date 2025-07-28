@@ -2,25 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Note from "@/lib/models/Note";
 
-// export async function GET(req: NextRequest) {
-//   await connectToDatabase();
-//   const { searchParams } = new URL(req.url);
-//   const userId = searchParams.get("userId");
-//   if (!userId)
-//     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+export async function GET(req: NextRequest) {
+  await connectToDatabase();
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
 
-//   const notes = await Note.find({ userId });
-//   return NextResponse.json(notes);
-// }
+  const filter: Record<string, unknown> = {};
+  if (userId) filter.userId = userId;
 
-// export async function POST(req: NextRequest) {
-//   await connectToDatabase();
-//   const body = await req.json();
-//   const { userId, text } = body;
-
-//   const note = await Note.create({ userId, text });
-//   return NextResponse.json(note, { status: 201 });
-// }
+  const notes = await Note.find(filter);
+  return NextResponse.json(notes);
+}
 
 export async function POST(req: NextRequest) {
   await connectToDatabase();
