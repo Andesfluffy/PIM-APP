@@ -1,4 +1,11 @@
-import { LogtoNextConfig } from "@logto/next";
+interface LogtoNextConfig {
+  endpoint: string;
+  appId: string;
+  appSecret: string;
+  baseUrl: string;
+  cookieSecret: string;
+  cookieSecure: boolean;
+}
 
 export const logtoConfig: LogtoNextConfig = {
   endpoint: process.env.LOGTO_ENDPOINT!,

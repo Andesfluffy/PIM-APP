@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 // ✅ Props typing
 type TasksProps = {
-  userId: string;
+  userId?: string;
   onBackToDashboard: () => void;
 };
 
@@ -34,7 +34,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           ? new Date(newTask.dueDate).toISOString()
           : undefined,
         status: "pending", // or whatever default you use
-        userId, // pass from props
+        userId: userId || "", // pass from props
       });
 
       setNewTask({
