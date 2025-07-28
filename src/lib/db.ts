@@ -1,10 +1,17 @@
 import mongoose from "mongoose";
 
+type MongooseConnection = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
 const MONGODB_URI = process.env.MONGODB_URI as string;
 
 if (!MONGODB_URI) throw new Error("Missing MONGODB_URI in environment.");
+const globalWithMongoose = global as unknown as { mongoose?: MongooseConnection };
 
-let cached = (global as any).mongoose || { conn: null, promise: null };
+const cached: MongooseConnection =
+  globalWithMongoose.mongoose || { conn: null, promise: null };
 
 export async function connectToDatabase() {
   if (cached.conn) return cached.conn;
@@ -19,5 +26,6 @@ export async function connectToDatabase() {
   }
 
   cached.conn = await cached.promise;
+  globalWithMongoose.mongoose = cached;
   return cached.conn;
 }

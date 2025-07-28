@@ -2,25 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Contact from "@/lib/models/Contact";
 
-// export async function GET(req: NextRequest) {
-//   await connectToDatabase();
-//   const { searchParams } = new URL(req.url);
-//   const userId = searchParams.get("userId");
-//   if (!userId)
-//     return NextResponse.json({ error: "Missing userId" }, { status: 400 });
+export async function GET(req: NextRequest) {
+  await connectToDatabase();
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
 
-//   const contacts = await Contact.find({ userId });
-//   return NextResponse.json(contacts);
-// }
+  const filter: Record<string, unknown> = {};
+  if (userId) filter.userId = userId;
 
-// export async function POST(req: NextRequest) {
-//   await connectToDatabase();
-//   const body = await req.json();
-//   const { userId, name, email, phone } = body;
-
-//   const contact = await Contact.create({ userId, name, email, phone });
-//   return NextResponse.json(contact, { status: 201 });
-// }
+  const contacts = await Contact.find(filter);
+  return NextResponse.json(contacts);
+}
 export async function POST(req: NextRequest) {
   await connectToDatabase();
   const { userId, name, email, phone } = await req.json();

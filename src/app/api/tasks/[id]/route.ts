@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Task from "@/lib/models/Task";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  await connectToDatabase();
+  const task = await Task.findById(params.id);
+  if (!task) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return NextResponse.json(task);
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
