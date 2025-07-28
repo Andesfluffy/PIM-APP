@@ -1,10 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import BackButton from "@/components/BackButton";
 import { AuthProvider } from "@/context/AuthContext";
 
-<BackButton />;
 
 const inter = Inter({ subsets: ["latin"] });
 
