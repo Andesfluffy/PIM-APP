@@ -5,7 +5,12 @@ type MongooseConnection = {
   promise: Promise<typeof mongoose> | null;
 };
 
-const MONGODB_URI = process.env.MONGODB_URI as string | undefined;
+// Allow using either MONGODB_URI or COSMOS_DB_CONNECTION_STRING
+// so the API works in different deployment environments.
+const MONGODB_URI =
+  (process.env.MONGODB_URI || process.env.COSMOS_DB_CONNECTION_STRING) as
+    | string
+    | undefined;
 const globalWithMongoose = global as unknown as { mongoose?: MongooseConnection };
 
 const cached: MongooseConnection =
