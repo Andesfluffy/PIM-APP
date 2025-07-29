@@ -1,88 +1,51 @@
-<!-- HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PIM App
 
-## Getting Started
+This project is a single page application built with **Next.js** and **TypeScript**. It provides a personal information manager for notes, contacts and tasks. Authentication is handled via Firebase and data is stored in MongoDB.
 
-First, run the development server:
+## Requirements
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18+
+- A MongoDB database
+- Firebase project for authentication
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-# Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-# PIM-APP
-
-e61cb67e5237cc1a1da6044d931b563ee7b99adf -->
-
-# Next.js Starter Project
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+1. Copy `.env.example` to `.env` and fill in the required values.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env
 ```
 
-Open http://localhost:3000 with your browser to see the result.
+At minimum you need to provide your MongoDB connection string and Firebase credentials.
 
-You can start editing the page by modifying app/page.tsx. The page auto-updates as you edit the file.
+2. Install dependencies and run the development server:
 
-This project uses next/font to automatically optimize and load Geist, a new font family for Vercel.
+```bash
+npm install
+npm run dev
+```
 
-Learn More
-To learn more about Next.js, take a look at the following resources:
+Open `http://localhost:3000` in your browser.
 
-Next.js Documentation - learn about Next.js features and API.
+## Deployment
 
-Learn Next.js - an interactive Next.js tutorial.
+### Vercel
 
-You can check out the Next.js GitHub repository - your feedback and contributions are welcome!
+This repository works out of the box with Vercel. Push your code to GitHub and import the project in Vercel. Make sure to add all variables from `.env.example` to your Vercel project settings.
 
-Deploy on Vercel
-The easiest way to deploy your Next.js app is to use the Vercel Platform from the creators of Next.js.
+### Azure Static Web Apps
 
-Check out the Next.js deployment documentation for more details.
+Two GitHub workflow files are included to deploy the SPA to Azure Static Web Apps. Configure the `AZURE_STATIC_WEB_APPS_API_TOKEN` secrets in your repository and adjust the `app_location`, `api_location` and `output_location` values if your structure changes.
 
-PIM-APP
-Git commit: e61cb67e5237cc1a1da6044d931b563ee7b99adf
+For Azure Functions the same environment variables defined in `.env` are required. See `azure-functions/` for the implementation.
 
-vbnet
-Copy
-Edit
+## Scripts
 
-Let me know if you'd like to add project-specific instructions or update the “PIM-APP” section to include setup or features.
+- `npm run dev` – start the development server
+- `npm run build` – build the application
+- `npm start` – start the production server
+- `npm run lint` – run ESLint
+
+---
+
+PIM App – manage your notes, tasks and contacts in one place.
