@@ -1,69 +1,3 @@
-// "use client";
-
-// import { useState, useEffect } from "react";
-
-// export interface Note {
-//   id: string;
-//   title: string;
-//   content: string;
-//   createdAt: Date;
-//   updatedAt: Date;
-//   userId: string;
-// }
-
-// export function useNotes(userId: string | undefined) {
-//   const [notes, setNotes] = useState<Note[]>([]);
-
-//   useEffect(() => {
-//     if (userId) {
-//       const savedNotes = localStorage.getItem(`notes_${userId}`);
-//       if (savedNotes) {
-//         const parsedNotes = JSON.parse(savedNotes).map((note: any) => ({
-//           ...note,
-//           createdAt: new Date(note.createdAt),
-//           updatedAt: new Date(note.updatedAt),
-//         }));
-//         setNotes(parsedNotes);
-//       }
-//     }
-//   }, [userId]);
-
-//   const saveNotes = (newNotes: Note[]) => {
-//     if (userId) {
-//       setNotes(newNotes);
-//       localStorage.setItem(`notes_${userId}`, JSON.stringify(newNotes));
-//     }
-//   };
-
-//   const createNote = (title: string, content: string) => {
-//     if (!userId) return;
-//     const newNote: Note = {
-//       id: `note_${Date.now()}`,
-//       title,
-//       content,
-//       createdAt: new Date(),
-//       updatedAt: new Date(),
-//       userId,
-//     };
-//     const updatedNotes = [newNote, ...notes];
-//     saveNotes(updatedNotes);
-//   };
-
-//   const updateNote = (id: string, title: string, content: string) => {
-//     const updatedNotes = notes.map((note) =>
-//       note.id === id ? { ...note, title, content, updatedAt: new Date() } : note
-//     );
-//     saveNotes(updatedNotes);
-//   };
-
-//   const deleteNote = (id: string) => {
-//     const updatedNotes = notes.filter((note) => note.id !== id);
-//     saveNotes(updatedNotes);
-//   };
-
-//   return { notes, createNote, updateNote, deleteNote };
-// }
-
 "use client";
 
 import { useEffect, useState } from "react";
@@ -80,7 +14,6 @@ export interface Note {
 export function useNotes(userId: string | undefined) {
   const [notes, setNotes] = useState<Note[]>([]);
 
-  // Fetch from backend
   useEffect(() => {
     if (userId) {
       fetch(`/api/notes`)

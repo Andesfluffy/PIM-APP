@@ -1,8 +1,6 @@
-// src/hooks/useApi.js - Custom hooks for API operations
 import { useState, useEffect, useCallback } from "react";
 import { notesApi, contactsApi, tasksApi } from "../services/api";
 
-// Generic API hook
 export function useApi(apiFunction, dependencies = []) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -26,7 +24,6 @@ export function useApi(apiFunction, dependencies = []) {
   return { data, loading, error, execute };
 }
 
-// Notes hooks
 export function useNotes(params = {}) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +111,6 @@ export function useNote(id) {
   return { note, loading, error, refetch: () => execute(id) };
 }
 
-// Contacts hooks
 export function useContacts(params = {}) {
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -202,7 +198,6 @@ export function useContact(id) {
   return { contact, loading, error, refetch: () => execute(id) };
 }
 
-// Tasks hooks
 export function useTasks(params = {}) {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -299,7 +294,6 @@ export function useTask(id) {
   return { task, loading, error, refetch: () => execute(id) };
 }
 
-// Specialized hooks
 export function useUpcomingTasks(days = 7) {
   const {
     data: tasks,
@@ -355,7 +349,6 @@ export function useFavoriteContacts() {
   };
 }
 
-// Search hooks
 export function useSearch(apiFunction, initialQuery = "") {
   const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState([]);
@@ -390,7 +383,7 @@ export function useSearch(apiFunction, initialQuery = "") {
       if (query) {
         search(query);
       }
-    }, 300); // Debounce search
+    }, 300); 
 
     return () => clearTimeout(timeoutId);
   }, [query, search]);

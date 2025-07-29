@@ -1,4 +1,3 @@
-// src/services/api.js - Frontend API Service
 const API_BASE_URL =
   process.env.REACT_APP_API_URL || "http://localhost:7071/api";
 
@@ -43,7 +42,6 @@ class ApiService {
     }
   }
 
-  // Generic CRUD operations
   async getAll(resource, params = {}) {
     const queryString = new URLSearchParams(params).toString();
     const endpoint = queryString
@@ -77,10 +75,8 @@ class ApiService {
   }
 }
 
-// Create singleton instance
 const apiService = new ApiService();
 
-// Notes API
 export const notesApi = {
   async getAll(params = {}) {
     return apiService.getAll("notes", params);
@@ -111,7 +107,6 @@ export const notesApi = {
   },
 };
 
-// Contacts API
 export const contactsApi = {
   async getAll(params = {}) {
     return apiService.getAll("contacts", params);
@@ -146,7 +141,6 @@ export const contactsApi = {
   },
 };
 
-// Tasks API
 export const tasksApi = {
   async getAll(params = {}) {
     return apiService.getAll("tasks", params);
