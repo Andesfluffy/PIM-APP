@@ -1,9 +1,28 @@
 "use client";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/services/firebase";
 
-const AuthContext = createContext({
+interface UserData {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  photoURL?: string | null;
+  emailVerified?: boolean;
+  metadata?: {
+    creationTime?: string;
+    lastSignInTime?: string;
+  };
+  providerId?: string | null;
+}
+
+interface AuthContextType {
+  user: UserData | null;
+  loading: boolean;
+  logout: () => Promise<void> | void;
+}
+
+const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
   logout: () => {},
@@ -11,8 +30,8 @@ const AuthContext = createContext({
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

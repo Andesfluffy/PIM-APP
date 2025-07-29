@@ -10,6 +10,14 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
+if (!firebaseConfig.apiKey) {
+  console.warn(
+    "Firebase environment variables are missing. Authentication will not work."
+  );
+}
+
+const app = initializeApp(
+  firebaseConfig.apiKey ? firebaseConfig : { apiKey: "demo" }
+);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
