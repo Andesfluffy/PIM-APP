@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (!auth) {
+      console.warn("Firebase Auth is not initialized.");
       setLoading(false);
       return;
     }
@@ -76,14 +77,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const logout = async () => {
-    if (auth) {
+    try {
       await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out:", error);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+    <AuthContext.Provider value={{ user,
