@@ -45,6 +45,32 @@ For Azure Functions the same environment variables defined in `.env` are require
 - `npm run build` – build the application
 - `npm start` – start the production server
 - `npm run lint` – run ESLint
+## Testing the API
+
+The REST endpoints for notes, tasks and contacts are served under `/api`. When running Azure Functions locally the base URL is `http://localhost:7071/api`.
+
+### Example requests
+
+```bash
+# list notes
+curl http://localhost:7071/api/notes
+
+# create a note
+curl -X POST http://localhost:7071/api/notes \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Demo","content":"Example"}'
+
+# update a note
+curl -X PUT http://localhost:7071/api/notes/<id> \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Updated"}'
+
+# delete a note
+curl -X DELETE http://localhost:7071/api/notes/<id>
+```
+
+Replace `<id>` with the document identifier returned from previous requests. The same patterns work for `contacts` and `tasks`.
+
 
 ---
 
