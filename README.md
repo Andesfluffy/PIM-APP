@@ -16,7 +16,7 @@ This project is a single page application built with **Next.js** and **TypeScrip
 cp .env.example .env
 ```
 
-At minimum you need to provide your MongoDB connection string and Firebase credentials.
+At minimum you need to provide your MongoDB connection string and Firebase credentials. The database name defaults to `pim-app`, but you can override it by setting `DATABASE_NAME` in your `.env` file.
 
 2. Install dependencies and run the development server:
 
