@@ -4,7 +4,6 @@ import { Contact, useContacts } from "@/hooks/useContacts";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-// ✅ Props definition
 type ContactsProps = {
   userId: string;
   onBackToDashboard: () => void;
@@ -229,7 +228,6 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         )}
       </div>
 
-      {/* ✅ Back Button */}
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}

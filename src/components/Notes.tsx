@@ -4,7 +4,6 @@ import { Note, useNotes } from "@/hooks/useNotes";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-// Accept the prop
 type NotesProps = {
   onBackToDashboard: () => void;
 };

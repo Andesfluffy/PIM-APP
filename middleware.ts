@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(request) {
+export function middleware(request: NextRequest) {
   // Get the Firebase Auth token from cookies
   const token = request.cookies.get("firebase-auth-token")?.value;
   const { pathname } = request.nextUrl;

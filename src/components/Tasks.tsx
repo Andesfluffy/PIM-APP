@@ -4,7 +4,6 @@ import { Task, useTasks } from "@/hooks/useTasks";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-// ✅ Props typing
 type TasksProps = {
   userId: string;
   onBackToDashboard: () => void;
@@ -33,8 +32,8 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         dueDate: newTask.dueDate
           ? new Date(newTask.dueDate).toISOString()
           : undefined,
-        status: "pending", // or whatever default you use
-        userId, // pass from props
+        status: "pending",
+        userId,
       });
 
       setNewTask({
