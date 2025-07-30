@@ -3,12 +3,20 @@ import { connectToDatabase } from "@/lib/db";
 import Note from "@/lib/models/Note";
 
 export async function GET(req: NextRequest) {
-  await connectToDatabase();
-  const { searchParams } = new URL(req.url);
-  const userId = searchParams.get("userId");
-  const query = userId ? { userId } : {};
-  const notes = await Note.find(query);
-  return NextResponse.json(notes);
+  try {
+    await connectToDatabase();
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+    const query = userId ? { userId } : {};
+    const notes = await Note.find(query);
+    return NextResponse.json(notes);
+  } catch (err: any) {
+    console.error("GET /api/notes error", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 // export async function GET(req: NextRequest) {
@@ -32,17 +40,25 @@ export async function GET(req: NextRequest) {
 // }
 
 export async function POST(req: NextRequest) {
-  await connectToDatabase();
-  const { userId, title, content } = await req.json();
-  if (!userId || !title || !content)
-    return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+  try {
+    await connectToDatabase();
+    const { userId, title, content } = await req.json();
+    if (!userId || !title || !content)
+      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-  const note = await Note.create({
-    userId,
-    title,
-    content,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  });
-  return NextResponse.json(note);
+    const note = await Note.create({
+      userId,
+      title,
+      content,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    return NextResponse.json(note);
+  } catch (err: any) {
+    console.error("POST /api/notes error", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }

@@ -28,6 +28,7 @@ pnpm-lock.yaml
 
 # Environment variables & secrets
 .env*
+!.env.example
 .azure/
 
 # OS & IDE clutter
@@ -72,6 +73,7 @@ dist/ # Added from remote
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 .azure/ # Added from remote
 
 # vercel
