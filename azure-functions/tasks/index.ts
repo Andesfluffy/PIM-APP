@@ -1,220 +1,129 @@
-// tasks/index.js - HTTP-triggered Azure Function for Tasks CRUD
-const { CosmosClient } = require("@azure/cosmos");
+import { MongoClient, ObjectId } from "mongodb";
 
-// Initialize Cosmos DB client
-const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
-const database = client.database(process.env.DATABASE_NAME || "spa-database");
-const container = database.container("tasks");
+const uri = process.env.MONGODB_URI as string;
+const dbName = process.env.DATABASE_NAME || "pim";
+const client = new MongoClient(uri);
 
-module.exports = async function (context, req) {
+async function getCollection() {
+  if (!client.topology) {
+    await client.connect();
+  }
+  return client.db(dbName).collection("tasks");
+}
+
+module.exports = async function (context: any, req: any) {
   context.log("Tasks function processed a request.");
 
-  // Set CORS headers
   context.res = {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   };
 
-  // Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
     context.res.status = 200;
     return;
   }
 
-  try {
-    const method = req.method;
-    const taskId = req.params.id;
+  const collection = await getCollection();
+  const id = req.params.id;
 
-    switch (method) {
+  try {
+    switch (req.method) {
       case "GET":
-        if (taskId) {
-          // Get single task
-          const { resource: task } = await container.item(taskId).read();
+        if (id) {
+          const task = await collection.findOne({ _id: new ObjectId(id) });
           if (task) {
-            context.res = {
-              ...context.res,
-              status: 200,
-              body: task,
-            };
+            context.res.status = 200;
+            context.res.body = task;
           } else {
-            context.res = {
-              ...context.res,
-              status: 404,
-              body: { error: "Task not found" },
-            };
+            context.res.status = 404;
+            context.res.body = { error: "Task not found" };
           }
         } else {
-          // Get all tasks with optional filtering
-          const status = req.query.status;
-          const priority = req.query.priority;
-
-          let querySpec = {
-            query: "SELECT * FROM c ORDER BY c.createdAt DESC",
-          };
-
-          if (status) {
-            querySpec = {
-              query:
-                "SELECT * FROM c WHERE c.status = @status ORDER BY c.createdAt DESC",
-              parameters: [{ name: "@status", value: status }],
-            };
-          }
-
-          if (priority) {
-            querySpec = {
-              query:
-                "SELECT * FROM c WHERE c.priority = @priority ORDER BY c.createdAt DESC",
-              parameters: [{ name: "@priority", value: priority }],
-            };
-          }
-
-          if (status && priority) {
-            querySpec = {
-              query:
-                "SELECT * FROM c WHERE c.status = @status AND c.priority = @priority ORDER BY c.createdAt DESC",
-              parameters: [
-                { name: "@status", value: status },
-                { name: "@priority", value: priority },
-              ],
-            };
-          }
-
-          const { resources: tasks } = await container.items
-            .query(querySpec)
-            .fetchAll();
-          context.res = {
-            ...context.res,
-            status: 200,
-            body: tasks,
-          };
+          const filter: any = {};
+          if (req.query.status) filter.status = req.query.status;
+          if (req.query.priority) filter.priority = req.query.priority;
+          const tasks = await collection
+            .find(filter)
+            .sort({ createdAt: -1 })
+            .toArray();
+          context.res.status = 200;
+          context.res.body = tasks;
         }
         break;
-
       case "POST":
-        // Create new task
         const newTask = {
-          id: generateId(),
-          title: req.body.title || "Untitled Task",
-          description: req.body.description || "",
-          status: req.body.status || "pending", // pending, in-progress, completed
-          priority: req.body.priority || "medium", // low, medium, high
-          dueDate: req.body.dueDate || null,
-          tags: req.body.tags || [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          title: req.body?.title || "Untitled Task",
+          description: req.body?.description || "",
+          status: req.body?.status || "pending",
+          priority: req.body?.priority || "medium",
+          dueDate: req.body?.dueDate || null,
+          tags: req.body?.tags || [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
           completedAt: null,
         };
-
-        const { resource: createdTask } = await container.items.create(newTask);
-        context.res = {
-          ...context.res,
-          status: 201,
-          body: createdTask,
-        };
+        const insert = await collection.insertOne(newTask);
+        const created = await collection.findOne({ _id: insert.insertedId });
+        context.res.status = 201;
+        context.res.body = created;
         break;
-
       case "PUT":
-        // Update existing task
-        if (!taskId) {
-          context.res = {
-            ...context.res,
-            status: 400,
-            body: { error: "Task ID is required for update" },
-          };
-          return;
+        if (!id) {
+          context.res.status = 400;
+          context.res.body = { error: "Task ID is required" };
+          break;
         }
-
-        const updateData = {
-          title: req.body.title,
-          description: req.body.description,
-          status: req.body.status,
-          priority: req.body.priority,
-          dueDate: req.body.dueDate,
-          tags: req.body.tags,
-          updatedAt: new Date().toISOString(),
+        const update: any = {
+          title: req.body?.title,
+          description: req.body?.description,
+          status: req.body?.status,
+          priority: req.body?.priority,
+          dueDate: req.body?.dueDate,
+          tags: req.body?.tags,
+          updatedAt: new Date(),
         };
-
-        // Handle completion status
-        if (
-          req.body.status === "completed" &&
-          updateData.completedAt === undefined
-        ) {
-          updateData.completedAt = new Date().toISOString();
-        } else if (req.body.status !== "completed") {
-          updateData.completedAt = null;
+        if (req.body?.status === "completed") {
+          update.completedAt = new Date();
+        } else if (req.body?.status) {
+          update.completedAt = null;
         }
-
-        // Remove undefined fields
-        Object.keys(updateData).forEach(
-          (key) => updateData[key] === undefined && delete updateData[key]
+        Object.keys(update).forEach(
+          (k) => update[k] === undefined && delete update[k]
         );
-
-        const { resource: existingTask } = await container.item(taskId).read();
-        if (!existingTask) {
-          context.res = {
-            ...context.res,
-            status: 404,
-            body: { error: "Task not found" },
-          };
-          return;
+        const updated = await collection.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $set: update },
+          { returnDocument: "after" }
+        );
+        if (!updated.value) {
+          context.res.status = 404;
+          context.res.body = { error: "Task not found" };
+        } else {
+          context.res.status = 200;
+          context.res.body = updated.value;
         }
-
-        const updatedTask = { ...existingTask, ...updateData };
-        const { resource: result } = await container
-          .item(taskId)
-          .replace(updatedTask);
-
-        context.res = {
-          ...context.res,
-          status: 200,
-          body: result,
-        };
         break;
-
       case "DELETE":
-        // Delete task
-        if (!taskId) {
-          context.res = {
-            ...context.res,
-            status: 400,
-            body: { error: "Task ID is required for deletion" },
-          };
-          return;
+        if (!id) {
+          context.res.status = 400;
+          context.res.body = { error: "Task ID is required" };
+          break;
         }
-
-        await container.item(taskId).delete();
-        context.res = {
-          ...context.res,
-          status: 204,
-          body: null,
-        };
+        await collection.deleteOne({ _id: new ObjectId(id) });
+        context.res.status = 204;
         break;
-
       default:
-        context.res = {
-          ...context.res,
-          status: 405,
-          body: { error: "Method not allowed" },
-        };
+        context.res.status = 405;
+        context.res.body = { error: "Method not allowed" };
     }
-  } catch (error) {
-    context.log.error("Error in tasks function:", error);
-    context.res = {
-      ...context.res,
-      status: 500,
-      body: {
-        error: "Internal server error",
-        details: error.message,
-      },
-    };
+  } catch (err: any) {
+    context.log.error("Error in tasks function:", err);
+    context.res.status = 500;
+    context.res.body = { error: "Internal server error" };
   }
 };
-
-// Helper function to generate unique IDs
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
