@@ -60,10 +60,9 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
 
   const filteredContacts = contacts.filter(
     (contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.phone &&
-        contact.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+      contact.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
