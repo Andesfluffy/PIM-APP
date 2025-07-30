@@ -78,11 +78,18 @@ The easiest way to deploy your Next.js app is to use the Vercel Platform from th
 
 Check out the Next.js deployment documentation for more details.
 
-PIM-APP
-Git commit: e61cb67e5237cc1a1da6044d931b563ee7b99adf
+## PIM-APP
 
-vbnet
-Copy
-Edit
+This project provides a simple personal information manager built with Next.js and Azure Functions.
 
-Let me know if you'd like to add project-specific instructions or update the “PIM-APP” section to include setup or features.
+### Azure Deployment
+
+1. **Cosmos DB** – Create a Cosmos DB account using the *MongoDB API* and enable the **Free Tier** (1000 RU/s and 25&nbsp;GB). Note the connection string and database name.
+2. **Azure Functions** – Deploy the functions in `azure-functions/` to a Function App. Each function exposes an endpoint like `https://<APP_NAME>.azurewebsites.net/api/<FUNCTION_NAME>`.
+3. **Frontend** – Deploy the Next.js app to a separate App Service or Azure Static Web App.
+4. **Configuration** – Define `MONGODB_URI` (the Cosmos DB connection string) and
+   optionally `DATABASE_NAME` in your Function App and frontend settings. You can
+   store these values in Azure Key Vault and reference them as application
+   settings.
+
+With both services deployed, the frontend can call the serverless API to manage notes, contacts and tasks stored in Cosmos DB.

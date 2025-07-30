@@ -1,172 +1,117 @@
-// notes/index.js - HTTP-triggered Azure Function for Notes CRUD
-const { CosmosClient } = require("@azure/cosmos");
+import { MongoClient, ObjectId } from "mongodb";
 
-// Initialize Cosmos DB client
-const client = new CosmosClient(process.env.COSMOS_DB_CONNECTION_STRING);
-const database = client.database(process.env.DATABASE_NAME || "spa-database");
-const container = database.container("notes");
+const uri = process.env.MONGODB_URI as string | undefined;
+const dbName = process.env.DATABASE_NAME || "pim";
 
-module.exports = async function (context, req) {
+if (!uri) {
+  throw new Error("Missing MONGODB_URI environment variable");
+}
+
+const client = new MongoClient(uri);
+
+async function getCollection() {
+  await client.connect();
+  return client.db(dbName).collection("notes");
+}
+
+module.exports = async function (context: any, req: any) {
   context.log("Notes function processed a request.");
 
-  // Set CORS headers
   context.res = {
     headers: {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   };
 
-  // Handle preflight OPTIONS request
   if (req.method === "OPTIONS") {
     context.res.status = 200;
     return;
   }
 
-  try {
-    const method = req.method;
-    const noteId = req.params.id;
+  const collection = await getCollection();
+  const id = req.params.id;
 
-    switch (method) {
+  try {
+    switch (req.method) {
       case "GET":
-        if (noteId) {
-          // Get single note
-          const { resource: note } = await container.item(noteId).read();
+        if (id) {
+          const note = await collection.findOne({ _id: new ObjectId(id) });
           if (note) {
-            context.res = {
-              ...context.res,
-              status: 200,
-              body: note,
-            };
+            context.res.status = 200;
+            context.res.body = note;
           } else {
-            context.res = {
-              ...context.res,
-              status: 404,
-              body: { error: "Note not found" },
-            };
+            context.res.status = 404;
+            context.res.body = { error: "Note not found" };
           }
         } else {
-          // Get all notes
-          const querySpec = {
-            query: "SELECT * FROM c ORDER BY c.createdAt DESC",
-          };
-          const { resources: notes } = await container.items
-            .query(querySpec)
-            .fetchAll();
-          context.res = {
-            ...context.res,
-            status: 200,
-            body: notes,
-          };
+          const notes = await collection
+            .find()
+            .sort({ createdAt: -1 })
+            .toArray();
+          context.res.status = 200;
+          context.res.body = notes;
         }
         break;
-
       case "POST":
-        // Create new note
         const newNote = {
-          id: generateId(),
-          title: req.body.title || "Untitled Note",
-          content: req.body.content || "",
-          tags: req.body.tags || [],
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          title: req.body?.title || "Untitled Note",
+          content: req.body?.content || "",
+          tags: req.body?.tags || [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
         };
-
-        const { resource: createdNote } = await container.items.create(newNote);
-        context.res = {
-          ...context.res,
-          status: 201,
-          body: createdNote,
-        };
+        const insertResult = await collection.insertOne(newNote);
+        const created = await collection.findOne({ _id: insertResult.insertedId });
+        context.res.status = 201;
+        context.res.body = created;
         break;
-
       case "PUT":
-        // Update existing note
-        if (!noteId) {
-          context.res = {
-            ...context.res,
-            status: 400,
-            body: { error: "Note ID is required for update" },
-          };
-          return;
+        if (!id) {
+          context.res.status = 400;
+          context.res.body = { error: "Note ID is required" };
+          break;
         }
-
-        const updateData = {
-          title: req.body.title,
-          content: req.body.content,
-          tags: req.body.tags,
-          updatedAt: new Date().toISOString(),
+        const updateData: any = {
+          title: req.body?.title,
+          content: req.body?.content,
+          tags: req.body?.tags,
+          updatedAt: new Date(),
         };
-
-        // Remove undefined fields
         Object.keys(updateData).forEach(
-          (key) => updateData[key] === undefined && delete updateData[key]
+          (k) => updateData[k] === undefined && delete updateData[k]
         );
-
-        const { resource: existingNote } = await container.item(noteId).read();
-        if (!existingNote) {
-          context.res = {
-            ...context.res,
-            status: 404,
-            body: { error: "Note not found" },
-          };
-          return;
+        const updateResult = await collection.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $set: updateData },
+          { returnDocument: "after" }
+        );
+        if (!updateResult.value) {
+          context.res.status = 404;
+          context.res.body = { error: "Note not found" };
+        } else {
+          context.res.status = 200;
+          context.res.body = updateResult.value;
         }
-
-        const updatedNote = { ...existingNote, ...updateData };
-        const { resource: result } = await container
-          .item(noteId)
-          .replace(updatedNote);
-
-        context.res = {
-          ...context.res,
-          status: 200,
-          body: result,
-        };
         break;
-
       case "DELETE":
-        // Delete note
-        if (!noteId) {
-          context.res = {
-            ...context.res,
-            status: 400,
-            body: { error: "Note ID is required for deletion" },
-          };
-          return;
+        if (!id) {
+          context.res.status = 400;
+          context.res.body = { error: "Note ID is required" };
+          break;
         }
-
-        await container.item(noteId).delete();
-        context.res = {
-          ...context.res,
-          status: 204,
-          body: null,
-        };
+        await collection.deleteOne({ _id: new ObjectId(id) });
+        context.res.status = 204;
         break;
-
       default:
-        context.res = {
-          ...context.res,
-          status: 405,
-          body: { error: "Method not allowed" },
-        };
+        context.res.status = 405;
+        context.res.body = { error: "Method not allowed" };
     }
-  } catch (error) {
-    context.log.error("Error in notes function:", error);
-    context.res = {
-      ...context.res,
-      status: 500,
-      body: {
-        error: "Internal server error",
-        details: error.message,
-      },
-    };
+  } catch (err: any) {
+    context.log.error("Error in notes function:", err);
+    context.res.status = 500;
+    context.res.body = { error: "Internal server error" };
   }
 };
-
-// Helper function to generate unique IDs
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
