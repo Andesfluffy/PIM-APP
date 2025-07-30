@@ -6,6 +6,7 @@ type MongooseConnection = {
 };
 
 const MONGODB_URI = process.env.MONGODB_URI as string | undefined;
+const DB_NAME = process.env.DATABASE_NAME || "pim-app";
 const globalWithMongoose = global as unknown as { mongoose?: MongooseConnection };
 
 const cached: MongooseConnection =
@@ -20,7 +21,7 @@ export async function connectToDatabase() {
   if (!cached.promise) {
     cached.promise = mongoose
       .connect(MONGODB_URI, {
-        dbName: "pim-app",
+        dbName: DB_NAME,
         bufferCommands: false,
       })
       .then((mongoose) => mongoose);
