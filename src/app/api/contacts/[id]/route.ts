@@ -2,15 +2,32 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Contact from "@/lib/models/Contact";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  await connectToDatabase();
+  const contact = await Contact.findById(params.id);
+  if (!contact) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  return NextResponse.json(contact);
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   await connectToDatabase();
   const body = await req.json();
-  const updated = await Contact.findByIdAndUpdate(params.id, body, {
-    new: true,
-  });
+  const updated = await Contact.findByIdAndUpdate(
+    params.id,
+    { ...body, updatedAt: new Date() },
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
   return NextResponse.json(updated);
 }
 

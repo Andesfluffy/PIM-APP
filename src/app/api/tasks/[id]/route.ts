@@ -2,6 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Task from "@/lib/models/Task";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  await connectToDatabase();
+  const task = await Task.findById(params.id);
+  if (!task) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+  return NextResponse.json(task);
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -12,10 +24,13 @@ export async function PUT(
     params.id,
     {
       title: body.title,
-      dueDate: body.dueDate,
+      description: body.description,
       status: body.status,
+      priority: body.priority,
+      dueDate: body.dueDate,
+      updatedAt: new Date(),
     },
-    { new: true }
+    { new: true, runValidators: true }
   );
 
   return NextResponse.json(updated);

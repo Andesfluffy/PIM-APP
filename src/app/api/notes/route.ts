@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/db";
 import Note from "@/lib/models/Note";
 
+export async function GET(req: NextRequest) {
+  await connectToDatabase();
+  const { searchParams } = new URL(req.url);
+  const userId = searchParams.get("userId");
+  const query = userId ? { userId } : {};
+  const notes = await Note.find(query);
+  return NextResponse.json(notes);
+}
+
 // export async function GET(req: NextRequest) {
 //   await connectToDatabase();
 //   const { searchParams } = new URL(req.url);

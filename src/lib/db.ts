@@ -24,8 +24,7 @@
 
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
-if (!MONGODB_URI) throw new Error("Missing MONGODB_URI in environment.");
+const MONGODB_URI = process.env.MONGODB_URI;
 
 declare global {
   var mongoose:
@@ -53,6 +52,9 @@ if (!globalWithMongoose.mongoose) {
 const cached = globalWithMongoose.mongoose;
 
 export async function connectToDatabase() {
+  if (!MONGODB_URI) {
+    throw new Error("Missing MONGODB_URI in environment.");
+  }
   if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
