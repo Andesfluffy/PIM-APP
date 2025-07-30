@@ -17,17 +17,62 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: true,
   },
 
-  // Optional: Add other useful configurations
+  // Add output configuration for better deployment compatibility
+  output: "standalone",
+
+  // Add trailing slash for better static hosting
+  trailingSlash: true,
+
+  // Configure images
   images: {
     // Configure domains if you're using external images
     domains: [],
-    // Enable image optimization
-    unoptimized: false,
+    // Disable image optimization to prevent build issues
+    unoptimized: true,
   },
 
-  // Optional: Enable experimental features if needed
-  experimental: {
-    // Add any experimental features you might need
+  // Disable SWC minification if causing issues
+  swcMinify: true,
+
+  // Configure build behavior
+  distDir: ".next",
+
+  // Disable telemetry to speed up build
+  telemetry: false,
+
+  // Configure webpack for better memory usage
+  webpack: (config, { dev, isServer }) => {
+    // Optimize for production builds
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          ...config.optimization.splitChunks,
+          cacheGroups: {
+            ...config.optimization.splitChunks.cacheGroups,
+            default: false,
+            vendors: false,
+            // Vendor chunk
+            vendor: {
+              name: "vendor",
+              chunks: "all",
+              test: /node_modules/,
+            },
+          },
+        },
+      };
+    }
+    return config;
+  },
+
+  // Optional: Add redirects or rewrites if needed
+  async redirects() {
+    return [];
+  },
+
+  // Optional: Add headers for better performance
+  async headers() {
+    return [];
   },
 };
 
