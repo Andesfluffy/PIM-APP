@@ -90,3 +90,13 @@ This project provides a simple personal information manager built with Next.js a
 4. **Configuration** – Set environment variables (`MONGODB_URI`, `DATABASE_NAME`, etc.) in App Service settings or store them in Azure Key Vault.
 
 With both services deployed, the frontend can call the serverless API to manage notes, contacts and tasks stored in Cosmos DB.
+
+### Environment Setup
+
+Copy `.env.example` to `.env.local` and provide the required values:
+
+```bash
+cp .env.example .env.local
+```
+
+At a minimum, set `MONGODB_URI` to your Cosmos DB connection string. Without this the API routes (e.g. `/api/contacts` and `/api/tasks`) will return a 500 error.

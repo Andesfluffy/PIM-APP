@@ -6,12 +6,20 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await connectToDatabase();
-  const note = await Note.findById(params.id);
-  if (!note) {
-    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  try {
+    await connectToDatabase();
+    const note = await Note.findById(params.id);
+    if (!note) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+    return NextResponse.json(note);
+  } catch (err: any) {
+    console.error("GET /api/notes/[id] error", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
-  return NextResponse.json(note);
 }
 
 
@@ -19,21 +27,37 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await connectToDatabase();
-  const { title, content } = await req.json();
-  const updated = await Note.findByIdAndUpdate(
-    params.id,
-    { title, content, updatedAt: new Date() },
-    { new: true, runValidators: true }
-  );
-  return NextResponse.json(updated);
+  try {
+    await connectToDatabase();
+    const { title, content } = await req.json();
+    const updated = await Note.findByIdAndUpdate(
+      params.id,
+      { title, content, updatedAt: new Date() },
+      { new: true, runValidators: true }
+    );
+    return NextResponse.json(updated);
+  } catch (err: any) {
+    console.error("PUT /api/notes/[id] error", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  await connectToDatabase();
-  await Note.findByIdAndDelete(params.id);
-  return new Response(null, { status: 204 });
+  try {
+    await connectToDatabase();
+    await Note.findByIdAndDelete(params.id);
+    return new Response(null, { status: 204 });
+  } catch (err: any) {
+    console.error("DELETE /api/notes/[id] error", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
 }
