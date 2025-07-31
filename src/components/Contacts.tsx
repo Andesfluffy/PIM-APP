@@ -194,7 +194,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                   <h3 className="text-white font-semibold text-lg">
                     {contact.name}
                   </h3>
-                  <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => startEdit(contact)}
                       className="text-blue-400 hover:text-blue-300 text-sm"
