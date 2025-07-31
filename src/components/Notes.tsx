@@ -3,6 +3,8 @@
 import { Note, useNotes } from "@/hooks/useNotes";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AlertDialog from "./AlertDialog";
+import ConfirmDialog from "./ConfirmDialog";
 
 type NotesProps = {
   userId?: string;
@@ -15,6 +17,8 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const [searchTerm, setSearchTerm] = useState("");
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
 
   const handleCreate = () => {
     if (newNote.title.trim() && newNote.content.trim()) {
@@ -22,7 +26,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
       setNewNote({ title: "", content: "" });
       setIsCreating(false);
     } else {
-      alert("Please fill in both the note title and content.");
+      setAlertMsg("Please fill in both the note title and content.");
     }
   };
 
@@ -33,7 +37,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         content: newNote.content,
       });
     } else {
-      alert("Please fill in both the note title and content.");
+      setAlertMsg("Please fill in both the note title and content.");
     }
   };
 
@@ -134,15 +138,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                   ✏️
                 </button>
                 <button
-                  onClick={() => {
-                    if (
-                      confirm(
-                        "Are you sure you want to delete this note? This action cannot be undone."
-                      )
-                    ) {
-                      deleteNote(note.id);
-                    }
-                  }}
+                  onClick={() => setNoteToDelete(note)}
                   className="text-red-400 hover:text-red-300 text-sm"
                 >
                   🗑️
@@ -181,6 +177,26 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
           ← Back to Dashboard
         </button>
       </div>
+      <ConfirmDialog
+        isOpen={!!noteToDelete}
+        title="Delete Note"
+        message="Are you sure you want to delete this note? This action cannot be undone."
+        onConfirm={() => {
+          if (noteToDelete) {
+            deleteNote(noteToDelete.id);
+            setNoteToDelete(null);
+          }
+        }}
+        onCancel={() => setNoteToDelete(null)}
+        confirmText="Delete"
+      />
+
+      <AlertDialog
+        isOpen={!!alertMsg}
+        title="Attention"
+        message={alertMsg || ""}
+        onClose={() => setAlertMsg(null)}
+      />
     </div>
   );
 };

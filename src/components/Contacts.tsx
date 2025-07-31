@@ -3,6 +3,8 @@
 import { Contact, useContacts } from "@/hooks/useContacts";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AlertDialog from "./AlertDialog";
+import ConfirmDialog from "./ConfirmDialog";
 
 type ContactsProps = {
   userId?: string;
@@ -20,6 +22,8 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
     phone: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
 
   const handleCreate = () => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,7 +42,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
     } else {
-      alert(
+      setAlertMsg(
         "Please provide a valid name and email. Phone number should contain digits only."
       );
     }
@@ -63,7 +67,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
     } else {
-      alert(
+      setAlertMsg(
         "Please provide a valid name and email. Phone number should contain digits only."
       );
     }
@@ -198,15 +202,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                       ✏️
                     </button>
                     <button
-                      onClick={() => {
-                        if (
-                          confirm(
-                            "Are you sure you want to delete this contact? This action cannot be undone."
-                          )
-                        ) {
-                          deleteContact(contact.id);
-                        }
-                      }}
+                      onClick={() => setContactToDelete(contact)}
                       className="text-red-400 hover:text-red-300 text-sm"
                     >
                       🗑️
@@ -265,6 +261,26 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           ← Back to Dashboard
         </button>
       </div>
+      <ConfirmDialog
+        isOpen={!!contactToDelete}
+        title="Delete Contact"
+        message="Are you sure you want to delete this contact? This action cannot be undone."
+        onConfirm={() => {
+          if (contactToDelete) {
+            deleteContact(contactToDelete.id);
+            setContactToDelete(null);
+          }
+        }}
+        onCancel={() => setContactToDelete(null)}
+        confirmText="Delete"
+      />
+
+      <AlertDialog
+        isOpen={!!alertMsg}
+        title="Attention"
+        message={alertMsg || ""}
+        onClose={() => setAlertMsg(null)}
+      />
     </div>
   );
 };
