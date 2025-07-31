@@ -44,7 +44,7 @@ interface Contact extends BaseEntity {
 interface Task extends BaseEntity {
   title: string;
   description?: string;
-  status: "pending" | "in-progress" | "completed" | "cancelled";
+  status: "pending" | "completed" | "cancelled";
   priority: "low" | "medium" | "high" | "urgent";
   dueDate?: string;
   completedAt?: string;
