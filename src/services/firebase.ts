@@ -1,6 +1,7 @@
 import { initializeApp } from "firebase/app";
 import type { FirebaseApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getApps, getApp } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -11,10 +12,6 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-let app: FirebaseApp | undefined;
-if (firebaseConfig.apiKey) {
-  app = initializeApp(firebaseConfig);
-}
-
-export const auth = app ? getAuth(app) : undefined;
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const auth = getAuth(app);
 export const googleProvider = app ? new GoogleAuthProvider() : undefined;

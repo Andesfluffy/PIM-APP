@@ -11,7 +11,7 @@ const AuthContext = createContext({
 
 export const useAuth = () => useContext(AuthContext);
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
             providerId: firebaseUser.providerData[0]?.providerId,
           };
 
-          setUser(userData);
+          setUser(userData as any);
         } catch (error) {
           console.error("Error getting ID token:", error);
           setUser(null);
