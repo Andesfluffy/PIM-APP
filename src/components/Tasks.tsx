@@ -234,7 +234,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           >
             <div className="flex justify-between items-start mb-2">
               <h3 className="text-white font-semibold text-lg">{task.title}</h3>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex gap-2">
                 <button
                   onClick={() => startEdit(task)}
                   className="text-blue-400 hover:text-blue-300 text-sm"
