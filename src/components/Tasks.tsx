@@ -2,6 +2,7 @@
 
 import { Task, useTasks } from "@/hooks/useTasks";
 import { useState } from "react";
+import CuteConfirm from "./CuteConfirm";
 import { motion } from "framer-motion";
 
 type TasksProps = {
@@ -20,9 +21,12 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     dueDate: "",
   });
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const handleCreate = () => {
-    if (newTask.title.trim()) {
+    const dueValid =
+      !newTask.dueDate || !isNaN(Date.parse(newTask.dueDate));
+    if (newTask.title.trim() && dueValid) {
       createTask({
         title: newTask.title,
         description: newTask.description,
@@ -41,11 +45,15 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         dueDate: "",
       });
       setIsCreating(false);
+    } else {
+      alert("Please enter a task title and a valid due date ✨");
     }
   };
 
   const handleUpdate = () => {
-    if (editingTask && newTask.title.trim()) {
+    const dueValid =
+      !newTask.dueDate || !isNaN(Date.parse(newTask.dueDate));
+    if (editingTask && newTask.title.trim() && dueValid) {
       updateTask(editingTask.id, {
         title: newTask.title,
         description: newTask.description,
@@ -63,6 +71,8 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         dueDate: "",
       });
       setIsCreating(false);
+    } else {
+      alert("Please enter a task title and a valid due date ✨");
     }
   };
 
@@ -79,10 +89,8 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     setIsCreating(true);
   };
 
-  const toggleStatus = (task: Task) => {
-    const nextStatus: Task["status"] =
-      task.status === "pending" ? "completed" : "pending";
-    updateTask(task.id, { status: nextStatus });
+  const updateStatus = (task: Task, status: Task["status"]) => {
+    updateTask(task.id, { status });
   };
 
   const filteredTasks = tasks.filter((task) =>
@@ -232,7 +240,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                   ✏️
                 </button>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setTaskToDelete(task)}
                   className="text-red-400 hover:text-red-300 text-sm"
                 >
                   🗑️
@@ -246,14 +254,28 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
 
             <div className="flex justify-between items-center mb-2">
               <div className="flex gap-2">
-                <button
-                  onClick={() => toggleStatus(task)}
-                  className={`px-2 py-1 rounded text-xs font-medium transition-colors ${getStatusColor(
+                <span
+                  className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(
                     task.status
                   )}`}
                 >
                   {task.status.replace("-", " ")}
-                </button>
+                </span>
+                {task.status === "pending" ? (
+                  <button
+                    onClick={() => updateStatus(task, "completed")}
+                    className="text-green-400 hover:text-green-300 text-xs"
+                  >
+                    Mark Completed
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => updateStatus(task, "pending")}
+                    className="text-yellow-400 hover:text-yellow-300 text-xs"
+                  >
+                    Mark Pending
+                  </button>
+                )}
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${getPriorityColor(
                     task.priority
@@ -298,6 +320,17 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           ← Back to Dashboard
         </button>
       </div>
+
+      {taskToDelete && (
+        <CuteConfirm
+          message={`Mark '${taskToDelete.title}' for deletion?`}
+          onConfirm={() => {
+            deleteTask(taskToDelete.id);
+            setTaskToDelete(null);
+          }}
+          onCancel={() => setTaskToDelete(null)}
+        />
+      )}
     </div>
   );
 };

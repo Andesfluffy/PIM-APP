@@ -2,6 +2,7 @@
 
 import { Note, useNotes } from "@/hooks/useNotes";
 import { useState } from "react";
+import CuteConfirm from "./CuteConfirm";
 import { motion } from "framer-motion";
 
 type NotesProps = {
@@ -15,12 +16,15 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const [searchTerm, setSearchTerm] = useState("");
+  const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
 
   const handleCreate = () => {
     if (newNote.title.trim() && newNote.content.trim()) {
       createNote(newNote.title, newNote.content);
       setNewNote({ title: "", content: "" });
       setIsCreating(false);
+    } else {
+      alert("Please fill in both the note title and content ✨");
     }
   };
 
@@ -30,6 +34,8 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         title: newNote.title,
         content: newNote.content,
       });
+    } else {
+      alert("Please fill in both the note title and content ✨");
     }
   };
 
@@ -130,7 +136,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                   ✏️
                 </button>
                 <button
-                  onClick={() => deleteNote(note.id)}
+                  onClick={() => setNoteToDelete(note)}
                   className="text-red-400 hover:text-red-300 text-sm"
                 >
                   🗑️
@@ -169,6 +175,17 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
           ← Back to Dashboard
         </button>
       </div>
+
+      {noteToDelete && (
+        <CuteConfirm
+          message={`Delete "${noteToDelete.title}"? This can't be undone!`}
+          onConfirm={() => {
+            deleteNote(noteToDelete.id);
+            setNoteToDelete(null);
+          }}
+          onCancel={() => setNoteToDelete(null)}
+        />
+      )}
     </div>
   );
 };

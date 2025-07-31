@@ -2,6 +2,7 @@
 
 import { Contact, useContacts } from "@/hooks/useContacts";
 import { useState } from "react";
+import CuteConfirm from "./CuteConfirm";
 import { motion } from "framer-motion";
 
 type ContactsProps = {
@@ -20,9 +21,16 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
     phone: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
 
   const handleCreate = () => {
-    if (newContact.name.trim() && newContact.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
+    if (
+      newContact.name.trim() &&
+      emailRegex.test(newContact.email.trim()) &&
+      phoneValid
+    ) {
       createContact({
         name: newContact.name,
         email: newContact.email,
@@ -31,11 +39,22 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       });
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
+    } else {
+      alert(
+        "Oops! Name and a valid email are required. Digits only for phone ✨"
+      );
     }
   };
 
   const handleUpdate = () => {
-    if (editingContact && newContact.name.trim() && newContact.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
+    if (
+      editingContact &&
+      newContact.name.trim() &&
+      emailRegex.test(newContact.email.trim()) &&
+      phoneValid
+    ) {
       updateContact(editingContact.id, {
         name: newContact.name,
         email: newContact.email,
@@ -45,6 +64,10 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       setEditingContact(null);
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
+    } else {
+      alert(
+        "Oops! Name and a valid email are required. Digits only for phone ✨"
+      );
     }
   };
 
@@ -177,7 +200,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                       ✏️
                     </button>
                     <button
-                      onClick={() => deleteContact(contact.id)}
+                      onClick={() => setContactToDelete(contact)}
                       className="text-red-400 hover:text-red-300 text-sm"
                     >
                       🗑️
@@ -236,6 +259,17 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           ← Back to Dashboard
         </button>
       </div>
+
+      {contactToDelete && (
+        <CuteConfirm
+          message={`Delete ${contactToDelete.name}? This can't be undone!`}
+          onConfirm={() => {
+            deleteContact(contactToDelete.id);
+            setContactToDelete(null);
+          }}
+          onCancel={() => setContactToDelete(null)}
+        />
+      )}
     </div>
   );
 };
