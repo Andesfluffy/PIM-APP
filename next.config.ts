@@ -32,13 +32,13 @@ const nextConfig: NextConfig = {
   },
 
   // Disable SWC minification if causing issues
-  swcMinify: true,
+  // swcMinify: true,
 
   // Configure build behavior
   distDir: ".next",
 
   // Disable telemetry to speed up build
-  telemetry: false,
+  // telemetry: false,
 
   // Configure webpack for better memory usage
   webpack: (config, { dev, isServer }) => {
