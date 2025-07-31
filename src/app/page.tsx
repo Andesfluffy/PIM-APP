@@ -95,7 +95,7 @@ export default function HomePage() {
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-fuchsia-200 mb-4">
+                  <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-white mb-4">
                     NEXUS PIM
                   </h1>
                   <p className="text-xl md:text-2xl text-white/70 mb-8">
@@ -157,7 +157,7 @@ export default function HomePage() {
                   initial={{ y: -30, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                 >
-                  <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-200 to-fuchsia-200 mb-4">
+                  <h1 className="text-4xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-200 to-white mb-4">
                     Welcome back, {user.name.split(" ")[0]}!
                   </h1>
                   <h2 className="text-xl md:text-2xl text-white/80 mb-12 font-light">
