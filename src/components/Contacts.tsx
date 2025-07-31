@@ -22,7 +22,13 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleCreate = () => {
-    if (newContact.name.trim() && newContact.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
+    if (
+      newContact.name.trim() &&
+      emailRegex.test(newContact.email.trim()) &&
+      phoneValid
+    ) {
       createContact({
         name: newContact.name,
         email: newContact.email,
@@ -31,11 +37,22 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       });
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
+    } else {
+      alert(
+        "Please provide a valid name and email. Phone number should contain digits only."
+      );
     }
   };
 
   const handleUpdate = () => {
-    if (editingContact && newContact.name.trim() && newContact.email.trim()) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
+    if (
+      editingContact &&
+      newContact.name.trim() &&
+      emailRegex.test(newContact.email.trim()) &&
+      phoneValid
+    ) {
       updateContact(editingContact.id, {
         name: newContact.name,
         email: newContact.email,
@@ -45,6 +62,10 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       setEditingContact(null);
       setNewContact({ name: "", email: "", phone: "" });
       setIsCreating(false);
+    } else {
+      alert(
+        "Please provide a valid name and email. Phone number should contain digits only."
+      );
     }
   };
 
@@ -177,7 +198,15 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                       ✏️
                     </button>
                     <button
-                      onClick={() => deleteContact(contact.id)}
+                      onClick={() => {
+                        if (
+                          confirm(
+                            "Are you sure you want to delete this contact? This action cannot be undone."
+                          )
+                        ) {
+                          deleteContact(contact.id);
+                        }
+                      }}
                       className="text-red-400 hover:text-red-300 text-sm"
                     >
                       🗑️
