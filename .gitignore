@@ -89,3 +89,5 @@ next-env.d.ts
 .vscode/ # Added from remote
 .idea/ # Added from remote
 Thumbs.db # Added from remote
+
+p
