@@ -32,7 +32,7 @@ export default function UserProfile({ user, onSignOut }) {
   const initials = getInitials(displayName);
 
   return (
-    <div className="absolute top-6 right-6 z-50">
+    <div className="absolute top-2 right-2 sm:top-4 sm:right-4 md:top-6 md:right-6 z-50">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -40,7 +40,7 @@ export default function UserProfile({ user, onSignOut }) {
       >
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-3 glass-card p-3 rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 group"
+          className="flex items-center gap-2 sm:gap-3 glass-card p-2 sm:p-3 rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 group"
         >
           {/* Avatar */}
           <div className="relative">
@@ -48,10 +48,10 @@ export default function UserProfile({ user, onSignOut }) {
               <img
                 src={user.photoURL}
                 alt={displayName}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-white/20 group-hover:ring-white/40 transition-all duration-300"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover ring-2 ring-white/20 group-hover:ring-white/40 transition-all duration-300"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/20 group-hover:ring-white/40 transition-all duration-300">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm ring-2 ring-white/20 group-hover:ring-white/40 transition-all duration-300">
                 {initials}
               </div>
             )}
