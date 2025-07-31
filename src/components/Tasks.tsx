@@ -3,6 +3,8 @@
 import { Task, useTasks } from "@/hooks/useTasks";
 import { useState } from "react";
 import { motion } from "framer-motion";
+import AlertDialog from "./AlertDialog";
+import ConfirmDialog from "./ConfirmDialog";
 
 type TasksProps = {
   userId?: string;
@@ -20,6 +22,8 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     dueDate: "",
   });
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
 
   const handleCreate = () => {
     const dueValid =
@@ -44,7 +48,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
       });
       setIsCreating(false);
     } else {
-      alert("Please enter a task title and a valid due date.");
+      setAlertMsg("Please enter a task title and a valid due date.");
     }
   };
 
@@ -70,7 +74,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
       });
       setIsCreating(false);
     } else {
-      alert("Please enter a task title and a valid due date.");
+      setAlertMsg("Please enter a task title and a valid due date.");
     }
   };
 
@@ -238,7 +242,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                   ✏️
                 </button>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setTaskToDelete(task)}
                   className="text-red-400 hover:text-red-300 text-sm"
                 >
                   🗑️
@@ -318,6 +322,26 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           ← Back to Dashboard
         </button>
       </div>
+      <ConfirmDialog
+        isOpen={!!taskToDelete}
+        title="Delete Task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        onConfirm={() => {
+          if (taskToDelete) {
+            deleteTask(taskToDelete.id);
+            setTaskToDelete(null);
+          }
+        }}
+        onCancel={() => setTaskToDelete(null)}
+        confirmText="Delete"
+      />
+
+      <AlertDialog
+        isOpen={!!alertMsg}
+        title="Attention"
+        message={alertMsg || ""}
+        onClose={() => setAlertMsg(null)}
+      />
     </div>
   );
 };
