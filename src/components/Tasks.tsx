@@ -19,9 +19,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     priority: "medium" as Task["priority"],
     dueDate: "",
   });
-  const [filter, setFilter] = useState<
-    "all" | "pending" | "in-progress" | "completed"
-  >("all");
+  const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
 
   const handleCreate = () => {
     if (newTask.title.trim()) {
@@ -82,13 +80,8 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
   };
 
   const toggleStatus = (task: Task) => {
-    const statusOrder: Task["status"][] = [
-      "pending",
-      "in-progress",
-      "completed",
-    ];
-    const currentIndex = statusOrder.indexOf(task.status);
-    const nextStatus = statusOrder[(currentIndex + 1) % statusOrder.length];
+    const nextStatus: Task["status"] =
+      task.status === "pending" ? "completed" : "pending";
     updateTask(task.id, { status: nextStatus });
   };
 
@@ -100,8 +93,6 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     switch (status) {
       case "pending":
         return "text-yellow-400 bg-yellow-600/20";
-      case "in-progress":
-        return "text-blue-400 bg-blue-600/20";
       case "completed":
         return "text-green-400 bg-green-600/20";
     }
@@ -134,7 +125,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
       </div>
 
       <div className="flex gap-2 mb-4 flex-wrap">
-        {(["all", "pending", "in-progress", "completed"] as const).map(
+        {(["all", "pending", "completed"] as const).map(
           (filterType) => (
             <button
               key={filterType}

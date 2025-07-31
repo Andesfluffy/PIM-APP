@@ -85,7 +85,14 @@ export function useNotes(userId: string | undefined) {
     if (userId) {
       fetch(`/api/notes?userId=${userId}`)
         .then((res) => res.json())
-        .then((data) => setNotes(data))
+        .then((data) =>
+          setNotes(
+            data.map((n: any) => ({
+              id: n._id,
+              ...n,
+            }))
+          )
+        )
         .catch(console.error);
     }
   }, [userId]);
@@ -101,7 +108,13 @@ export function useNotes(userId: string | undefined) {
       return;
     }
     const newNote = await res.json();
-    setNotes((prev) => [...prev, newNote]);
+    setNotes((prev) => [
+      ...prev,
+      {
+        id: newNote._id,
+        ...newNote,
+      },
+    ]);
   };
 
   const updateNote = async (id: string, updatedFields: Partial<Note>) => {
@@ -112,7 +125,9 @@ export function useNotes(userId: string | undefined) {
     });
     const updatedNote = await res.json();
     setNotes((prev) =>
-      prev.map((note) => (note.id === id ? updatedNote : note))
+      prev.map((note) =>
+        note.id === id ? { id: updatedNote._id, ...updatedNote } : note
+      )
     );
   };
 

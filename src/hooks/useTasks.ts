@@ -6,7 +6,7 @@
 //   id: string;
 //   title: string;
 //   description: string;
-//   status: "pending" | "in-progress" | "completed";
+//   status: "pending" | "completed";
 //   priority: "low" | "medium" | "high";
 //   dueDate?: Date;
 //   createdAt: Date;
@@ -84,7 +84,7 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  status: "pending" | "in-progress" | "completed";
+  status: "pending" | "completed";
   priority: "low" | "medium" | "high";
   dueDate?: string;
   createdAt: string;
@@ -99,7 +99,14 @@ export function useTasks(userId: string | undefined) {
     if (userId) {
       fetch(`/api/tasks?userId=${userId}`)
         .then((res) => res.json())
-        .then(setTasks)
+        .then((data) =>
+          setTasks(
+            data.map((t: any) => ({
+              id: t._id,
+              ...t,
+            }))
+          )
+        )
         .catch(console.error);
     }
   }, [userId]);
@@ -117,7 +124,13 @@ export function useTasks(userId: string | undefined) {
       return;
     }
     const newTask = await res.json();
-    setTasks((prev) => [...prev, newTask]);
+    setTasks((prev) => [
+      ...prev,
+      {
+        id: newTask._id,
+        ...newTask,
+      },
+    ]);
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
@@ -127,7 +140,9 @@ export function useTasks(userId: string | undefined) {
       body: JSON.stringify(updates),
     });
     const updated = await res.json();
-    setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { id: updated._id, ...updated } : t))
+    );
   };
 
   const deleteTask = async (id: string) => {

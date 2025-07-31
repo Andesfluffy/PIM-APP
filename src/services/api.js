@@ -189,7 +189,7 @@ export const tasksApi = {
     toDate.setDate(toDate.getDate() + days);
     return apiService.getAll("tasks", {
       dueDateTo: toDate.toISOString(),
-      status: "todo,in-progress",
+      status: "todo,pending",
     });
   },
 
@@ -198,7 +198,7 @@ export const tasksApi = {
     today.setHours(0, 0, 0, 0);
     return apiService.getAll("tasks", {
       dueDateTo: today.toISOString(),
-      status: "todo,in-progress",
+      status: "todo,pending",
     });
   },
 };

@@ -96,7 +96,14 @@ export function useContacts(userId: string | undefined) {
     if (userId) {
       fetch(`/api/contacts?userId=${userId}`)
         .then((res) => res.json())
-        .then(setContacts)
+        .then((data) =>
+          setContacts(
+            data.map((c: any) => ({
+              id: c._id,
+              ...c,
+            }))
+          )
+        )
         .catch(console.error);
     }
   }, [userId]);
@@ -114,7 +121,13 @@ export function useContacts(userId: string | undefined) {
       return;
     }
     const newContact = await res.json();
-    setContacts((prev) => [...prev, newContact]);
+    setContacts((prev) => [
+      ...prev,
+      {
+        id: newContact._id,
+        ...newContact,
+      },
+    ]);
   };
 
   const updateContact = async (id: string, updates: Partial<Contact>) => {
@@ -124,7 +137,9 @@ export function useContacts(userId: string | undefined) {
       body: JSON.stringify(updates),
     });
     const updated = await res.json();
-    setContacts((prev) => prev.map((c) => (c.id === id ? updated : c)));
+    setContacts((prev) =>
+      prev.map((c) => (c.id === id ? { id: updated._id, ...updated } : c))
+    );
   };
 
   const deleteContact = async (id: string) => {
