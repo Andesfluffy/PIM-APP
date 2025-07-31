@@ -7,6 +7,6 @@ export async function connectToDatabase() {
   if (mongoose.connection.readyState >= 1) return;
 
   return mongoose.connect(MONGODB_URI, {
-    dbName: "pim",
+    dbName: "pim-db",
   });
 }

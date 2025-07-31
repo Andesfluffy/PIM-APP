@@ -83,7 +83,7 @@ export function useNotes(userId: string | undefined) {
   // Fetch from backend
   useEffect(() => {
     if (userId) {
-      fetch(`/api/notes`)
+      fetch(`/api/notes?userId=${userId}`)
         .then((res) => res.json())
         .then((data) => setNotes(data))
         .catch(console.error);
@@ -94,8 +94,12 @@ export function useNotes(userId: string | undefined) {
     const res = await fetch(`/api/notes`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content }),
+      body: JSON.stringify({ title, content, userId }),
     });
+    if (!res.ok) {
+      console.error(`Failed to create note: ${res.status}`);
+      return;
+    }
     const newNote = await res.json();
     setNotes((prev) => [...prev, newNote]);
   };

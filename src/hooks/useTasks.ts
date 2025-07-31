@@ -97,7 +97,7 @@ export function useTasks(userId: string | undefined) {
 
   useEffect(() => {
     if (userId) {
-      fetch("/api/tasks")
+      fetch(`/api/tasks?userId=${userId}`)
         .then((res) => res.json())
         .then(setTasks)
         .catch(console.error);
@@ -112,6 +112,10 @@ export function useTasks(userId: string | undefined) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(task),
     });
+    if (!res.ok) {
+      console.error(`Failed to create task: ${res.status}`);
+      return;
+    }
     const newTask = await res.json();
     setTasks((prev) => [...prev, newTask]);
   };
