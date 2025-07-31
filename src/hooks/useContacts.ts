@@ -94,7 +94,7 @@ export function useContacts(userId: string | undefined) {
 
   useEffect(() => {
     if (userId) {
-      fetch("/api/contacts")
+      fetch(`/api/contacts?userId=${userId}`)
         .then((res) => res.json())
         .then(setContacts)
         .catch(console.error);
@@ -109,6 +109,10 @@ export function useContacts(userId: string | undefined) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(contact),
     });
+    if (!res.ok) {
+      console.error(`Failed to create contact: ${res.status}`);
+      return;
+    }
     const newContact = await res.json();
     setContacts((prev) => [...prev, newContact]);
   };

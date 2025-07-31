@@ -1,7 +1,7 @@
 import { MongoClient, ObjectId } from "mongodb";
 
 const uri = process.env.MONGODB_URI as string;
-const dbName = process.env.DATABASE_NAME || "pim";
+const dbName = process.env.DATABASE_NAME || "pim-db";
 const client = new MongoClient(uri);
 
 async function getCollection() {

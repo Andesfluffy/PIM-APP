@@ -5,7 +5,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 type TasksProps = {
-  userId: string;
+  userId?: string;
   onBackToDashboard: () => void;
 };
 

@@ -5,11 +5,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 
 type NotesProps = {
+  userId?: string;
   onBackToDashboard: () => void;
 };
 
-const Notes = ({ onBackToDashboard }: NotesProps) => {
-  const { notes, createNote, updateNote, deleteNote } = useNotes("");
+const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
+  const { notes, createNote, updateNote, deleteNote } = useNotes(userId);
   const [isCreating, setIsCreating] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ title: "", content: "" });

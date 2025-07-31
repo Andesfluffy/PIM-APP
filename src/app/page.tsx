@@ -231,11 +231,26 @@ export default function HomePage() {
                   Back to Dashboard
                 </button>
 
-                <div className="">
-                  {view === "notes" && <Notes />}
-                  {view === "tasks" && <Tasks userId={user.id} />}
-                  {view === "contacts" && <Contacts userId={user.id} />}
-                </div>
+                  <div className="">
+                    {view === "notes" && (
+                      <Notes
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                    {view === "tasks" && (
+                      <Tasks
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                    {view === "contacts" && (
+                      <Contacts
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                  </div>
               </motion.div>
             )}
 
@@ -268,11 +283,23 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                <div className="">
-                  {view === "notes" && <Notes />}
-                  {view === "tasks" && <Tasks />}
-                  {view === "contacts" && <Contacts />}
-                </div>
+                  <div className="">
+                    {view === "notes" && (
+                      <Notes
+                        onBackToDashboard={() => setView("auth")}
+                      />
+                    )}
+                    {view === "tasks" && (
+                      <Tasks
+                        onBackToDashboard={() => setView("auth")}
+                      />
+                    )}
+                    {view === "contacts" && (
+                      <Contacts
+                        onBackToDashboard={() => setView("auth")}
+                      />
+                    )}
+                  </div>
               </motion.div>
             )}
           </motion.div>

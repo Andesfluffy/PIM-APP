@@ -100,3 +100,4 @@ cp .env.example .env.local
 ```
 
 At a minimum, set `MONGODB_URI` to your Cosmos DB connection string. Without this the API routes (e.g. `/api/contacts` and `/api/tasks`) will return a 500 error.
+The application uses a database named `pim-db`. You can override this by setting the `DATABASE_NAME` environment variable.
