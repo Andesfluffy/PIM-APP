@@ -16,7 +16,7 @@ const Modal = ({ isOpen, title, children, onClose, actions }: ModalProps) => {
       {isOpen && (
         <motion.div
           key="overlay"
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -25,15 +25,16 @@ const Modal = ({ isOpen, title, children, onClose, actions }: ModalProps) => {
           <motion.div
             key="dialog"
             onClick={(e) => e.stopPropagation()}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-6 w-full max-w-md"
+            initial={{ scale: 0.96, opacity: 0, y: 10 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.96, opacity: 0, y: 10 }}
+            transition={{ duration: 0.2 }}
+            className="w-full max-w-md rounded-3xl border border-rose-200/70 bg-white/95 p-6 shadow-2xl shadow-rose-200"
           >
             {title && (
-              <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
+              <h3 className="mb-3 text-lg font-semibold text-rose-600">{title}</h3>
             )}
-            <div className="text-white mb-4">{children}</div>
+            <div className="mb-5 text-sm text-rose-500">{children}</div>
             {actions && <div className="flex justify-end gap-2">{actions}</div>}
           </motion.div>
         </motion.div>

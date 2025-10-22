@@ -11,6 +11,12 @@ type ContactsProps = {
   onBackToDashboard: () => void;
 };
 
+type ContactErrors = {
+  name?: string;
+  email?: string;
+  phone?: string;
+};
+
 const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   const { contacts, createContact, updateContact, deleteContact } =
     useContacts(userId);
@@ -24,53 +30,64 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
+  const [formErrors, setFormErrors] = useState<ContactErrors>({});
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?[0-9\-\s()]{0,20}$/;
+
+  const resetForm = () => {
+    setNewContact({ name: "", email: "", phone: "" });
+    setIsCreating(false);
+    setEditingContact(null);
+    setFormErrors({});
+  };
+
+  const validateForm = () => {
+    const errors: ContactErrors = {};
+    if (!newContact.name.trim()) {
+      errors.name = "A contact name is required.";
+    }
+    if (!emailRegex.test(newContact.email.trim())) {
+      errors.email = "Please enter a valid email.";
+    }
+    if (newContact.phone && !phoneRegex.test(newContact.phone.trim())) {
+      errors.phone = "Use digits, spaces, parentheses, or dashes only.";
+    }
+    setFormErrors(errors);
+    return errors;
+  };
 
   const handleCreate = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
-    if (
-      newContact.name.trim() &&
-      emailRegex.test(newContact.email.trim()) &&
-      phoneValid
-    ) {
-      createContact({
-        name: newContact.name,
-        email: newContact.email,
-        phone: newContact.phone || undefined,
-        userId,
-      });
-      setNewContact({ name: "", email: "", phone: "" });
-      setIsCreating(false);
-    } else {
-      setAlertMsg(
-        "Please provide a valid name and email. Phone number should contain digits only."
-      );
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setAlertMsg("Please fix the highlighted contact fields before saving.");
+      return;
     }
+
+    createContact({
+      name: newContact.name.trim(),
+      email: newContact.email.trim(),
+      phone: newContact.phone.trim() || undefined,
+      userId,
+    });
+    resetForm();
   };
 
   const handleUpdate = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneValid = !newContact.phone || /^\d+$/.test(newContact.phone);
-    if (
-      editingContact &&
-      newContact.name.trim() &&
-      emailRegex.test(newContact.email.trim()) &&
-      phoneValid
-    ) {
-      updateContact(editingContact.id, {
-        name: newContact.name,
-        email: newContact.email,
-        phone: newContact.phone || undefined,
-        userId,
-      });
-      setEditingContact(null);
-      setNewContact({ name: "", email: "", phone: "" });
-      setIsCreating(false);
-    } else {
-      setAlertMsg(
-        "Please provide a valid name and email. Phone number should contain digits only."
-      );
+    if (!editingContact) return;
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setAlertMsg("Please fix the highlighted contact fields before updating.");
+      return;
     }
+
+    updateContact(editingContact.id, {
+      name: newContact.name.trim(),
+      email: newContact.email.trim(),
+      phone: newContact.phone.trim() || undefined,
+      userId,
+    });
+    resetForm();
   };
 
   const startEdit = (contact: Contact) => {
@@ -80,6 +97,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       email: contact.email,
       phone: contact.phone || "",
     });
+    setFormErrors({});
     setIsCreating(true);
   };
 
@@ -87,84 +105,141 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
     (contact) =>
       contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.phone &&
-        contact.phone.toLowerCase().includes(searchTerm.toLowerCase()))
+      (contact.phone && contact.phone.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-          <span className="text-4xl">📇</span>
-          Contacts
-        </h2>
+    <div className="glass-card rounded-3xl border border-rose-200/60 p-6 shadow-lg shadow-rose-100">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="flex items-center gap-3 text-3xl font-bold text-rose-600">
+            <span className="text-4xl">📇</span>
+            Contacts
+          </h2>
+          <p className="text-sm text-rose-500">Cherish every connection in one pretty place.</p>
+        </div>
         <button
-          onClick={() => setIsCreating(true)}
-          className="bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-700 hover:to-purple-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+          onClick={() => {
+            setIsCreating(true);
+            setFormErrors({});
+          }}
+          className="rounded-2xl bg-gradient-to-r from-rose-400 via-pink-300 to-amber-300 px-5 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
         >
           + New Contact
         </button>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-5">
+        <label className="sr-only" htmlFor="contact-search">
+          Search contacts
+        </label>
         <input
+          id="contact-search"
           type="text"
           placeholder="Search contacts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full rounded-2xl border border-rose-200/70 bg-white/80 px-4 py-3 text-rose-700 placeholder:text-rose-300 shadow-inner focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
         />
       </div>
 
       {isCreating && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 p-4 rounded-xl border border-white/20 mb-4"
+          className="mb-6 rounded-2xl border border-rose-200/70 bg-white/85 p-5 shadow-md"
         >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-            <input
-              type="text"
-              placeholder="Full name..."
-              value={newContact.name}
-              onChange={(e) =>
-                setNewContact({ ...newContact, name: e.target.value })
-              }
-              className="bg-transparent border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-purple-500"
-            />
-            <input
-              type="email"
-              placeholder="Email address..."
-              value={newContact.email}
-              onChange={(e) =>
-                setNewContact({ ...newContact, email: e.target.value })
-              }
-              className="bg-transparent border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-purple-500"
-            />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-name">
+                Name
+              </label>
+              <input
+                id="contact-name"
+                type="text"
+                placeholder="Full name..."
+                value={newContact.name}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewContact((prev) => ({ ...prev, name: value }));
+                  if (formErrors.name && value.trim()) {
+                    setFormErrors((prev) => ({ ...prev, name: undefined }));
+                  }
+                }}
+                className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                  formErrors.name
+                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
+                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                }`}
+              />
+              {formErrors.name && (
+                <p className="mt-1 text-sm text-rose-500">{formErrors.name}</p>
+              )}
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-email">
+                Email
+              </label>
+              <input
+                id="contact-email"
+                type="email"
+                placeholder="Email address..."
+                value={newContact.email}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewContact((prev) => ({ ...prev, email: value }));
+                  if (formErrors.email && emailRegex.test(value.trim())) {
+                    setFormErrors((prev) => ({ ...prev, email: undefined }));
+                  }
+                }}
+                className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                  formErrors.email
+                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
+                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                }`}
+              />
+              {formErrors.email && (
+                <p className="mt-1 text-sm text-rose-500">{formErrors.email}</p>
+              )}
+            </div>
           </div>
-          <input
-            type="tel"
-            placeholder="Phone number (optional)..."
-            value={newContact.phone}
-            onChange={(e) =>
-              setNewContact({ ...newContact, phone: e.target.value })
-            }
-            className="w-full bg-transparent border border-white/20 rounded-lg px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-1 focus:ring-purple-500 mb-3"
-          />
-          <div className="flex gap-2">
+          <div className="mt-4">
+            <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-phone">
+              Phone (optional)
+            </label>
+            <input
+              id="contact-phone"
+              type="tel"
+              placeholder="Phone number..."
+              value={newContact.phone}
+              onChange={(e) => {
+                const value = e.target.value;
+                setNewContact((prev) => ({ ...prev, phone: value }));
+                if (formErrors.phone && phoneRegex.test(value.trim())) {
+                  setFormErrors((prev) => ({ ...prev, phone: undefined }));
+                }
+              }}
+              className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                formErrors.phone
+                  ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
+                  : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+              }`}
+            />
+            {formErrors.phone && (
+              <p className="mt-1 text-sm text-rose-500">{formErrors.phone}</p>
+            )}
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingContact ? handleUpdate : handleCreate}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded-lg text-sm font-medium"
+              className="rounded-xl bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 px-4 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
             >
               {editingContact ? "Update" : "Create"}
             </button>
             <button
-              onClick={() => {
-                setIsCreating(false);
-                setEditingContact(null);
-                setNewContact({ name: "", email: "", phone: "" });
-              }}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-1 rounded-lg text-sm font-medium"
+              onClick={resetForm}
+              className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-400 transition-colors hover:border-rose-300 hover:text-rose-500"
             >
               Cancel
             </button>
@@ -172,16 +247,16 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         </motion.div>
       )}
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
         {filteredContacts.map((contact) => (
           <motion.div
             key={contact.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white/10 p-4 rounded-xl border border-white/20 hover:border-white/30 transition-colors group"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-rose-200/70 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-rose-300 hover:shadow-md"
           >
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-rose-300 to-pink-200 text-lg font-bold text-rose-700">
                 {contact.name
                   .split(" ")
                   .map((n) => n[0])
@@ -190,54 +265,50 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                   .substring(0, 2)}
               </div>
               <div className="flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-white font-semibold text-lg">
-                    {contact.name}
-                  </h3>
-                  <div className="flex gap-2">
+                <div className="mb-2 flex items-start justify-between gap-3">
+                  <h3 className="text-lg font-semibold text-rose-600">{contact.name}</h3>
+                  <div className="flex gap-2 text-lg">
                     <button
                       onClick={() => startEdit(contact)}
-                      className="text-blue-400 hover:text-blue-300 text-sm"
+                      className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
+                      aria-label="Edit contact"
                     >
                       ✏️
                     </button>
                     <button
                       onClick={() => setContactToDelete(contact)}
-                      className="text-red-400 hover:text-red-300 text-sm"
+                      className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
+                      aria-label="Delete contact"
                     >
                       🗑️
                     </button>
                   </div>
                 </div>
-                <div className="space-y-1 text-sm mb-2">
-                  <p className="text-white/80 flex items-center gap-2">
+                <div className="space-y-1 text-sm">
+                  <p className="flex items-center gap-2 text-rose-500">
                     <span>📧</span>
                     <a
                       href={`mailto:${contact.email}`}
-                      className="hover:text-purple-300 transition-colors"
+                      className="text-rose-500 underline decoration-rose-300 decoration-dotted underline-offset-4 hover:text-rose-600"
                     >
                       {contact.email}
                     </a>
                   </p>
                   {contact.phone && (
-                    <p className="text-white/80 flex items-center gap-2">
+                    <p className="flex items-center gap-2 text-rose-500">
                       <span>📞</span>
                       <a
                         href={`tel:${contact.phone}`}
-                        className="hover:text-purple-300 transition-colors"
+                        className="text-rose-500 underline decoration-rose-300 decoration-dotted underline-offset-4 hover:text-rose-600"
                       >
                         {contact.phone}
                       </a>
                     </p>
                   )}
                 </div>
-                <div className="flex justify-between items-center text-xs text-white/50">
-                  <span>
-                    Created: {new Date(contact.createdAt).toLocaleDateString()}
-                  </span>
-                  <span>
-                    Updated: {new Date(contact.updatedAt).toLocaleDateString()}
-                  </span>
+                <div className="mt-4 flex flex-wrap items-center justify-between text-xs text-rose-300">
+                  <span>Created: {new Date(contact.createdAt).toLocaleDateString()}</span>
+                  <span>Updated: {new Date(contact.updatedAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -245,7 +316,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         ))}
 
         {filteredContacts.length === 0 && (
-          <div className="text-center text-white/50 py-8">
+          <div className="py-10 text-center text-rose-400">
             {searchTerm
               ? "No contacts found matching your search."
               : "No contacts yet. Add your first contact!"}
@@ -256,11 +327,12 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="text-purple-400 hover:text-purple-200 text-sm underline"
+          className="text-sm font-semibold text-rose-500 transition-colors hover:text-rose-600"
         >
-          ← Back to Dashboard
+          ← Back to dashboard
         </button>
       </div>
+
       <ConfirmDialog
         isOpen={!!contactToDelete}
         title="Delete Contact"
@@ -277,7 +349,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
 
       <AlertDialog
         isOpen={!!alertMsg}
-        title="Attention"
+        title="We spotted a hiccup"
         message={alertMsg || ""}
         onClose={() => setAlertMsg(null)}
       />
