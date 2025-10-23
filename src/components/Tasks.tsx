@@ -118,36 +118,36 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
   const getStatusBadge = (status: Task["status"]) => {
     switch (status) {
       case "pending":
-        return "bg-emerald-100 text-emerald-600";
+        return "bg-naples-yellow-900 text-oxford-blue-500";
       case "completed":
-        return "bg-emerald-600 text-white";
+        return "bg-tea-green-500 text-oxford-blue-500";
       default:
-        return "bg-emerald-100 text-emerald-600";
+        return "bg-naples-yellow-900 text-oxford-blue-500";
     }
   };
 
   const getPriorityBadge = (priority: Task["priority"]) => {
     switch (priority) {
       case "high":
-        return "bg-emerald-500/90 text-white";
+        return "bg-red-crayola-500 text-white";
       case "medium":
-        return "bg-teal-100 text-teal-600";
+        return "bg-naples-yellow-900 text-oxford-blue-500";
       case "low":
-        return "bg-lime-100 text-lime-600";
+        return "bg-tea-green-900 text-oxford-blue-500";
       default:
-        return "bg-emerald-100 text-emerald-600";
+        return "bg-naples-yellow-900 text-oxford-blue-500";
     }
   };
 
   return (
-    <div className="rounded-[32px] border border-emerald-100/70 bg-white/80 p-8 shadow-[0_40px_80px_-55px_rgba(12,74,48,0.6)] backdrop-blur-xl">
+    <div className="rounded-[32px] border border-tea-green-700 bg-white/85 p-8 shadow-[0_40px_80px_-55px_rgba(1,25,54,0.4)] backdrop-blur-xl">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-3 rounded-full bg-emerald-100/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-500">
+          <div className="inline-flex items-center gap-3 rounded-full bg-naples-yellow-900 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-oxford-blue-400">
             Tasks
           </div>
-          <h2 className="text-3xl text-emerald-800">Plan with clarity and momentum</h2>
-          <p className="type-subtle text-sm text-emerald-600/80">
+          <h2 className="text-3xl text-oxford-blue-500">Plan with clarity and momentum</h2>
+          <p className="type-subtle text-sm text-charcoal-500/85">
             Structure your day with elegant boards that balance priorities and progress.
           </p>
         </div>
@@ -156,7 +156,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
             setIsCreating(true);
             setFormErrors({});
           }}
-          className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-6 py-3 text-sm font-semibold text-emerald-900 shadow-[0_18px_36px_-20px_rgba(16,94,67,0.45)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+          className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
         >
           Add task
         </button>
@@ -167,10 +167,10 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           <button
             key={filterType}
             onClick={() => setFilter(filterType)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-200 ${
+            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-crayola-200 ${
               filter === filterType
-                ? "bg-emerald-600 text-white shadow-[0_15px_30px_-20px_rgba(16,94,67,0.5)]"
-                : "border border-emerald-200 bg-white/70 text-emerald-600 hover:border-emerald-300"
+                ? "bg-red-crayola-500 text-white shadow-[0_15px_30px_-20px_rgba(237,37,78,0.35)]"
+                : "border border-tea-green-700 bg-white/80 text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
             }`}
           >
             {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
@@ -182,11 +182,11 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 rounded-2xl border border-emerald-100/70 bg-white/85 p-6 shadow-[0_20px_45px_-30px_rgba(12,74,48,0.45)]"
+          className="mb-6 rounded-2xl border border-tea-green-700 bg-white/90 p-6 shadow-[0_20px_45px_-30px_rgba(1,25,54,0.35)]"
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="task-title">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="task-title">
                 Title
               </label>
               <input
@@ -201,19 +201,19 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                     setFormErrors((prev) => ({ ...prev, title: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.title
-                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
+                    ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
+                    : "border-tea-green-700 bg-white/85 focus:border-red-crayola-400 focus:ring-red-crayola-200"
                 }`}
               />
               {formErrors.title && (
-                <p className="mt-1 text-sm text-emerald-600">{formErrors.title}</p>
+                <p className="mt-1 text-sm text-red-crayola-500">{formErrors.title}</p>
               )}
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="task-priority">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="task-priority">
                 Priority
               </label>
               <select
@@ -222,7 +222,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                 onChange={(e) =>
                   setNewTask((prev) => ({ ...prev, priority: e.target.value as Task["priority"] }))
                 }
-                className="w-full rounded-xl border border-emerald-100 bg-white/80 px-4 py-3 text-sm text-emerald-700 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-tea-green-700 bg-white/85 px-4 py-3 text-sm text-oxford-blue-500 focus:border-red-crayola-400 focus:outline-none focus:ring-2 focus:ring-red-crayola-200"
               >
                 <option value="high">High</option>
                 <option value="medium">Medium</option>
@@ -231,7 +231,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="task-due-date">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="task-due-date">
                 Due date
               </label>
               <input
@@ -248,19 +248,19 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                     }
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 focus:outline-none focus:ring-2 ${
                   formErrors.dueDate
-                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
+                    ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
+                    : "border-tea-green-700 bg-white/85 focus:border-red-crayola-400 focus:ring-red-crayola-200"
                 }`}
               />
               {formErrors.dueDate && (
-                <p className="mt-1 text-sm text-emerald-600">{formErrors.dueDate}</p>
+                <p className="mt-1 text-sm text-red-crayola-500">{formErrors.dueDate}</p>
               )}
             </div>
 
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="task-description">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="task-description">
                 Description
               </label>
               <textarea
@@ -270,7 +270,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                 onChange={(e) =>
                   setNewTask((prev) => ({ ...prev, description: e.target.value }))
                 }
-                className="h-32 w-full resize-none rounded-xl border border-emerald-100 bg-white/80 px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+                className="h-32 w-full resize-none rounded-xl border border-tea-green-700 bg-white/85 px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:border-red-crayola-400 focus:outline-none focus:ring-2 focus:ring-red-crayola-200"
               />
             </div>
           </div>
@@ -278,13 +278,13 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingTask ? handleUpdate : handleCreate}
-              className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-22px_rgba(16,94,67,0.55)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-emerald-700"
+              className="rounded-xl bg-red-crayola-500 px-5 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-22px_rgba(237,37,78,0.35)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-red-crayola-600"
             >
               {editingTask ? "Update task" : "Create task"}
             </button>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-emerald-200 bg-white/80 px-5 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
+              className="rounded-xl border border-tea-green-700 bg-white/85 px-5 py-2 text-sm font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
             >
               Cancel
             </button>
@@ -298,7 +298,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
             key={task.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group rounded-2xl border border-emerald-100/70 bg-white/85 p-5 shadow-sm shadow-emerald-50 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(12,74,48,0.55)]"
+            className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
@@ -306,9 +306,9 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
                   <span className="h-2 w-2 rounded-full bg-white/80" />
                   {task.priority.charAt(0).toUpperCase() + task.priority.slice(1)} priority
                 </p>
-                <h3 className="text-lg font-semibold text-emerald-800">{task.title}</h3>
+                <h3 className="text-lg font-semibold text-oxford-blue-500">{task.title}</h3>
                 {task.description && (
-                  <p className="type-subtle text-sm text-emerald-600/90">{task.description}</p>
+                  <p className="type-subtle text-sm text-charcoal-500/90">{task.description}</p>
                 )}
               </div>
               <div className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusBadge(task.status)}`}>
@@ -316,7 +316,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
               </div>
             </div>
 
-            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-emerald-300">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-charcoal-400">
               <span>
                 Updated {new Date(task.updatedAt ?? task.createdAt).toLocaleDateString()}
               </span>
@@ -328,19 +328,19 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => updateStatus(task, task.status === "completed" ? "pending" : "completed")}
-                className="rounded-xl border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-semibold text-emerald-600 transition-colors hover:border-emerald-300 hover:text-emerald-700"
+                className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
               >
                 Mark as {task.status === "completed" ? "pending" : "completed"}
               </button>
               <button
                 onClick={() => startEdit(task)}
-                className="rounded-xl border border-emerald-200 bg-white/80 px-4 py-2 text-xs font-semibold text-emerald-600 transition-colors hover:border-emerald-300 hover:text-emerald-700"
+                className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
               >
                 Edit
               </button>
               <button
                 onClick={() => setTaskToDelete(task)}
-                className="rounded-xl border border-transparent bg-emerald-50 px-4 py-2 text-xs font-semibold text-emerald-500 transition-colors hover:bg-emerald-100"
+                className="rounded-xl border border-transparent bg-naples-yellow-900 px-4 py-2 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800"
               >
                 Delete
               </button>
@@ -349,7 +349,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         ))}
 
         {filteredTasks.length === 0 && (
-          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-emerald-100 text-center text-emerald-300">
+          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-tea-green-700 text-center text-charcoal-400">
             {filter === "all"
               ? "No tasks yet. Create your first plan."
               : "Nothing matches this filter right now."}
@@ -360,7 +360,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="type-subtle text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
+          className="type-subtle text-sm font-semibold text-oxford-blue-400 transition-colors hover:text-red-crayola-500"
         >
           ← Back to dashboard
         </button>

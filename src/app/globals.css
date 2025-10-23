@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e7f1ec;
-  --foreground: #0f2d22;
-  --accent-soft: rgba(209, 238, 226, 0.55);
+  --background: #fef8df;
+  --foreground: #011936;
+  --accent-soft: rgba(237, 37, 78, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(18, 74, 48, 0.16);
-  --glass-shadow: 0 32px 70px -38px rgba(12, 74, 48, 0.45);
+  --glass-border: rgba(1, 25, 54, 0.12);
+  --glass-shadow: 0 32px 70px -38px rgba(1, 25, 54, 0.35);
   --font-display: var(--font-playfair);
 }
 
@@ -20,12 +20,12 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c1511;
-    --foreground: #eefaf3;
-    --accent-soft: rgba(16, 61, 44, 0.65);
-    --glass-bg: rgba(18, 46, 34, 0.92);
-    --glass-border: rgba(67, 160, 120, 0.35);
-    --glass-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55);
+    --background: #01142c;
+    --foreground: #fdf1be;
+    --accent-soft: rgba(249, 220, 92, 0.2);
+    --glass-bg: rgba(9, 23, 45, 0.92);
+    --glass-border: rgba(249, 220, 92, 0.25);
+    --glass-shadow: 0 30px 60px -30px rgba(1, 25, 54, 0.6);
   }
 }
 
@@ -69,7 +69,7 @@ h4 {
 }
 
 .btn-primary {
-  @apply bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition-all;
+  @apply bg-gradient-to-br from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 text-base font-semibold text-oxford-blue-500 py-2 px-4 rounded-lg transition-all;
 }
 .btn-primary:hover {
   @apply shadow-lg translate-y-[-1px];

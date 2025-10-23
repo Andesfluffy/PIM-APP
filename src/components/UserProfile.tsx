@@ -37,32 +37,32 @@ export default function UserProfile({ user, onSignOut }) {
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="relative">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="group flex items-center gap-2 rounded-2xl border border-emerald-200/70 bg-white/70 px-3 py-2 shadow-md shadow-emerald-100 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+          className="group flex items-center gap-2 rounded-2xl border border-tea-green-700 bg-white/80 px-3 py-2 shadow-md shadow-charcoal-900/40 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
         >
           <div className="relative">
             {user?.photoURL ? (
               <img
                 src={user.photoURL}
                 alt={displayName}
-                className="h-10 w-10 rounded-full object-cover ring-2 ring-emerald-200 group-hover:ring-emerald-300 transition-all"
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-tea-green-700 group-hover:ring-tea-green-600 transition-all"
               />
             ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-emerald-200 to-teal-200 text-sm font-semibold text-emerald-700 ring-2 ring-emerald-200 group-hover:ring-emerald-300 transition-all">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-red-crayola-800 to-naples-yellow-800 text-sm font-semibold text-oxford-blue-500 ring-2 ring-tea-green-700 group-hover:ring-tea-green-600 transition-all">
                 {initials}
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-emerald-400" />
+            <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-white bg-tea-green-400" />
           </div>
 
           <div className="hidden text-left md:block">
-            <p className="max-w-32 truncate text-sm font-semibold text-emerald-600">{displayName}</p>
-            <p className="max-w-32 truncate text-xs text-emerald-400">{displayEmail}</p>
+            <p className="max-w-32 truncate text-sm font-semibold text-oxford-blue-500">{displayName}</p>
+            <p className="max-w-32 truncate text-xs text-charcoal-500">{displayEmail}</p>
           </div>
 
           <motion.span
             animate={{ rotate: isOpen ? 180 : 0 }}
             transition={{ duration: 0.2 }}
-            className="text-emerald-300"
+            className="text-charcoal-500"
           >
             <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -77,33 +77,33 @@ export default function UserProfile({ user, onSignOut }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: -8 }}
               transition={{ duration: 0.2 }}
-              className="absolute right-0 mt-3 w-72 rounded-3xl border border-emerald-200/70 bg-white/90 p-4 shadow-xl shadow-emerald-100"
+              className="absolute right-0 mt-3 w-72 rounded-3xl border border-tea-green-700 bg-white/95 p-4 shadow-xl shadow-charcoal-900/30"
             >
               <div className="mb-4 flex items-center gap-3">
                 {user?.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt={displayName}
-                    className="h-12 w-12 rounded-full object-cover ring-2 ring-emerald-200"
+                    className="h-12 w-12 rounded-full object-cover ring-2 ring-tea-green-700"
                   />
                 ) : (
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-200 to-teal-200 text-base font-semibold text-emerald-700 ring-2 ring-emerald-200">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-red-crayola-800 to-naples-yellow-800 text-base font-semibold text-oxford-blue-500 ring-2 ring-tea-green-700">
                     {initials}
                   </div>
                 )}
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold text-emerald-600">{displayName}</p>
-                  <p className="truncate text-xs text-emerald-400">{displayEmail}</p>
+                  <p className="truncate text-sm font-semibold text-oxford-blue-500">{displayName}</p>
+                  <p className="truncate text-xs text-charcoal-500">{displayEmail}</p>
                   {user?.id && (
-                    <p className="truncate text-xs text-emerald-300">ID: {user.id.slice(0, 8)}...</p>
+                    <p className="truncate text-xs text-charcoal-400">ID: {user.id.slice(0, 8)}...</p>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-2xl bg-emerald-50/70 p-3 text-xs text-emerald-500">
+              <div className="rounded-2xl bg-tea-green-900 p-3 text-xs text-oxford-blue-400">
                 <div className="flex justify-between">
                   <span>Status</span>
-                  <span className="font-semibold text-emerald-500">Active</span>
+                  <span className="font-semibold text-oxford-blue-500">Active</span>
                 </div>
                 {user?.metadata?.creationTime && (
                   <div className="mt-1 flex justify-between">
@@ -116,14 +116,14 @@ export default function UserProfile({ user, onSignOut }) {
               <button
                 onClick={handleSignOut}
                 disabled={isLoggingOut}
-                className="mt-4 flex w-full items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-left text-sm font-semibold text-emerald-600 transition-all hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="mt-4 flex w-full items-center gap-3 rounded-2xl border border-tea-green-700 bg-white px-4 py-3 text-left text-sm font-semibold text-oxford-blue-500 transition-all hover:border-red-crayola-400 hover:text-red-crayola-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500">
                   {isLoggingOut ? (
                     <motion.div
                       animate={{ rotate: 360 }}
                       transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      className="h-4 w-4 rounded-full border-2 border-emerald-400 border-t-transparent"
+                      className="h-4 w-4 rounded-full border-2 border-red-crayola-400 border-t-transparent"
                     />
                   ) : (
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -138,7 +138,7 @@ export default function UserProfile({ user, onSignOut }) {
                 </div>
                 <div>
                   <p>{isLoggingOut ? "Signing out..." : "Sign out"}</p>
-                  <p className="text-xs font-normal text-emerald-300">End your session</p>
+                  <p className="text-xs font-normal text-charcoal-400">End your session</p>
                 </div>
               </button>
             </motion.div>

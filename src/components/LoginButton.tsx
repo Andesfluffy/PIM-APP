@@ -43,8 +43,8 @@ export default function LoginButton({
     "group relative flex items-center justify-center gap-3 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
   const variantClasses =
     variant === "solid"
-      ? "bg-emerald-600 text-white shadow-[0_18px_35px_rgba(16,94,67,0.18)] hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(16,94,67,0.25)] focus-visible:outline-emerald-600"
-      : "border border-slate-200 bg-white text-slate-700 shadow-sm hover:border-emerald-400 hover:text-emerald-700 focus-visible:outline-emerald-500";
+      ? "bg-red-crayola-500 text-white shadow-[0_18px_35px_rgba(237,37,78,0.18)] hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(237,37,78,0.25)] focus-visible:outline-red-crayola-500"
+      : "border border-charcoal-900 bg-white text-charcoal-600 shadow-sm hover:border-red-crayola-400 hover:text-red-crayola-500 focus-visible:outline-red-crayola-400";
   const widthClass = fullWidth ? "w-full" : "";
 
   return (
