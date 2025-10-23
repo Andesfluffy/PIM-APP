@@ -30,13 +30,13 @@ const ConfirmDialog = ({
         <>
           <button
             onClick={onCancel}
-            className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
+            className="rounded-xl border border-tea-green-700 bg-white px-4 py-2 text-sm font-semibold text-oxford-blue-500 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className="rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-md shadow-emerald-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-200"
+            className="rounded-xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-4 py-2 text-sm font-semibold text-oxford-blue-500 shadow-md shadow-charcoal-900/30 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
           >
             {confirmText}
           </button>

@@ -109,14 +109,14 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   );
 
   return (
-    <div className="rounded-[32px] border border-emerald-100/70 bg-white/80 p-8 shadow-[0_40px_80px_-55px_rgba(12,74,48,0.6)] backdrop-blur-xl">
+    <div className="rounded-[32px] border border-tea-green-700 bg-white/85 p-8 shadow-[0_40px_80px_-55px_rgba(1,25,54,0.4)] backdrop-blur-xl">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-3 rounded-full bg-emerald-100/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-500">
+          <div className="inline-flex items-center gap-3 rounded-full bg-naples-yellow-900 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-oxford-blue-400">
             Contacts
           </div>
-          <h2 className="text-3xl text-emerald-800">Nurture every relationship with ease</h2>
-          <p className="type-subtle text-sm text-emerald-600/80">
+          <h2 className="text-3xl text-oxford-blue-500">Nurture every relationship with ease</h2>
+          <p className="type-subtle text-sm text-charcoal-500/85">
             Maintain an elegant directory with smart filters and concise profile cards.
           </p>
         </div>
@@ -125,7 +125,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
             setIsCreating(true);
             setFormErrors({});
           }}
-          className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-6 py-3 text-sm font-semibold text-emerald-900 shadow-[0_18px_36px_-20px_rgba(16,94,67,0.45)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-emerald-200"
+          className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
         >
           Add contact
         </button>
@@ -142,9 +142,9 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
             placeholder="Search contacts by name, email, or number"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full rounded-2xl border border-emerald-100/70 bg-white/70 px-5 py-3 text-sm text-emerald-700 shadow-inner shadow-emerald-50 placeholder:text-emerald-200 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-2xl border border-tea-green-700 bg-white/75 px-5 py-3 text-sm text-oxford-blue-500 shadow-inner shadow-charcoal-900/10 placeholder:text-charcoal-400 focus:border-red-crayola-400 focus:outline-none focus:ring-2 focus:ring-red-crayola-200"
           />
-          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-emerald-200">🔍</span>
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-charcoal-400">🔍</span>
         </div>
       </div>
 
@@ -152,11 +152,11 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 rounded-2xl border border-emerald-100/70 bg-white/85 p-6 shadow-[0_20px_45px_-30px_rgba(12,74,48,0.45)]"
+          className="mb-6 rounded-2xl border border-tea-green-700 bg-white/90 p-6 shadow-[0_20px_45px_-30px_rgba(1,25,54,0.35)]"
         >
           <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="contact-name">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="contact-name">
                 Name
               </label>
               <input
@@ -171,18 +171,18 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                     setFormErrors((prev) => ({ ...prev, name: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.name
-                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
+                    ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
+                    : "border-tea-green-700 bg-white/85 focus:border-red-crayola-400 focus:ring-red-crayola-200"
                 }`}
               />
               {formErrors.name && (
-                <p className="mt-1 text-sm text-emerald-600">{formErrors.name}</p>
+                <p className="mt-1 text-sm text-red-crayola-500">{formErrors.name}</p>
               )}
             </div>
             <div>
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="contact-email">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="contact-email">
                 Email
               </label>
               <input
@@ -197,18 +197,18 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                     setFormErrors((prev) => ({ ...prev, email: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.email
-                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
+                    ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
+                    : "border-tea-green-700 bg-white/85 focus:border-red-crayola-400 focus:ring-red-crayola-200"
                 }`}
               />
               {formErrors.email && (
-                <p className="mt-1 text-sm text-emerald-600">{formErrors.email}</p>
+                <p className="mt-1 text-sm text-red-crayola-500">{formErrors.email}</p>
               )}
             </div>
             <div className="md:col-span-2">
-              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="contact-phone">
+              <label className="mb-1.5 block text-sm font-semibold text-oxford-blue-500" htmlFor="contact-phone">
                 Phone (optional)
               </label>
               <input
@@ -223,14 +223,14 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                     setFormErrors((prev) => ({ ...prev, phone: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.phone
-                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
+                    ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
+                    : "border-tea-green-700 bg-white/85 focus:border-red-crayola-400 focus:ring-red-crayola-200"
                 }`}
               />
               {formErrors.phone && (
-                <p className="mt-1 text-sm text-emerald-600">{formErrors.phone}</p>
+                <p className="mt-1 text-sm text-red-crayola-500">{formErrors.phone}</p>
               )}
             </div>
           </div>
@@ -238,13 +238,13 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingContact ? handleUpdate : handleCreate}
-              className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-22px_rgba(16,94,67,0.55)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-emerald-700"
+              className="rounded-xl bg-red-crayola-500 px-5 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-22px_rgba(237,37,78,0.35)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-red-crayola-600"
             >
               {editingContact ? "Update contact" : "Create contact"}
             </button>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-emerald-200 bg-white/80 px-5 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
+              className="rounded-xl border border-tea-green-700 bg-white/85 px-5 py-2 text-sm font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
             >
               Cancel
             </button>
@@ -258,34 +258,34 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
             key={contact.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group rounded-2xl border border-emerald-100/70 bg-white/85 p-5 shadow-sm shadow-emerald-50 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(12,74,48,0.55)]"
+            className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-emerald-800">{contact.name}</h3>
-                <p className="type-subtle text-sm text-emerald-600/90">{contact.email}</p>
+                <h3 className="text-lg font-semibold text-oxford-blue-500">{contact.name}</h3>
+                <p className="type-subtle text-sm text-charcoal-500/90">{contact.email}</p>
                 {contact.phone && (
-                  <p className="type-subtle text-sm text-emerald-500">{contact.phone}</p>
+                  <p className="type-subtle text-sm text-oxford-blue-400">{contact.phone}</p>
                 )}
               </div>
               <div className="flex gap-2 text-lg">
                 <button
                   onClick={() => startEdit(contact)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 transition-all hover:bg-emerald-100"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
                   aria-label="Edit contact"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => setContactToDelete(contact)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 transition-all hover:bg-emerald-100"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
                   aria-label="Delete contact"
                 >
                   🗑️
                 </button>
               </div>
             </div>
-            <div className="flex flex-wrap items-center justify-between text-xs text-emerald-300">
+            <div className="flex flex-wrap items-center justify-between text-xs text-charcoal-400">
               <span>Added {new Date(contact.createdAt).toLocaleDateString()}</span>
               {contact.updatedAt && (
                 <span>Updated {new Date(contact.updatedAt).toLocaleDateString()}</span>
@@ -295,7 +295,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         ))}
 
         {filteredContacts.length === 0 && (
-          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-emerald-100 text-center text-emerald-300">
+          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-tea-green-700 text-center text-charcoal-400">
             {searchTerm
               ? "No contacts match your search yet."
               : "Your address book is clear. Add your first contact."}
@@ -306,7 +306,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="type-subtle text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
+          className="type-subtle text-sm font-semibold text-oxford-blue-400 transition-colors hover:text-red-crayola-500"
         >
           ← Back to dashboard
         </button>

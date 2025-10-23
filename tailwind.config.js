@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: "class", // Enables dark mode using .dark class on <html>
+const config = {
+  darkMode: "class",
   content: [
     "./src/app/**/*.{js,ts,jsx,tsx}",
     "./src/components/**/*.{js,ts,jsx,tsx}",
@@ -22,11 +22,9 @@ module.exports = {
           },
         },
       },
-      colors: {
-        primary: "#6366f1", // Optional: Indigo
-        secondary: "#a855f7", // Optional: Purple
-      },
     },
   },
   plugins: [],
 };
+
+export default config;

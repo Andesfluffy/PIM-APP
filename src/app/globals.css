@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #e7f1ec;
-  --foreground: #0f2d22;
-  --accent-soft: rgba(209, 238, 226, 0.55);
+  --background: #fef8df;
+  --foreground: #011936;
+  --accent-soft: rgba(237, 37, 78, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.78);
-  --glass-border: rgba(18, 74, 48, 0.16);
-  --glass-shadow: 0 32px 70px -38px rgba(12, 74, 48, 0.45);
+  --glass-border: rgba(1, 25, 54, 0.12);
+  --glass-shadow: 0 32px 70px -38px rgba(1, 25, 54, 0.35);
   --font-display: var(--font-playfair);
 }
 
@@ -16,16 +16,71 @@
   --font-sans: var(--font-plus-jakarta);
   --font-mono: var(--font-geist-mono);
   --font-display: var(--font-playfair);
+  --color-red-crayola: #ed254e;
+  --color-red-crayola-100: #33040d;
+  --color-red-crayola-200: #66081b;
+  --color-red-crayola-300: #990c28;
+  --color-red-crayola-400: #cc1136;
+  --color-red-crayola-500: #ed254e;
+  --color-red-crayola-600: #f15171;
+  --color-red-crayola-700: #f47d95;
+  --color-red-crayola-800: #f8a8b8;
+  --color-red-crayola-900: #fbd4dc;
+  --color-naples-yellow: #f9dc5c;
+  --color-naples-yellow-100: #423602;
+  --color-naples-yellow-200: #846d05;
+  --color-naples-yellow-300: #c6a307;
+  --color-naples-yellow-400: #f7ce1b;
+  --color-naples-yellow-500: #f9dc5c;
+  --color-naples-yellow-600: #fae37d;
+  --color-naples-yellow-700: #fbea9e;
+  --color-naples-yellow-800: #fdf1be;
+  --color-naples-yellow-900: #fef8df;
+  --color-tea-green: #c2eabd;
+  --color-tea-green-100: #194014;
+  --color-tea-green-200: #338129;
+  --color-tea-green-300: #4cc13d;
+  --color-tea-green-400: #87d67d;
+  --color-tea-green-500: #c2eabd;
+  --color-tea-green-600: #ceeeca;
+  --color-tea-green-700: #dbf3d7;
+  --color-tea-green-800: #e7f7e5;
+  --color-tea-green-900: #f3fbf2;
+  --color-oxford-blue: #011936;
+  --color-oxford-blue-100: #00050b;
+  --color-oxford-blue-200: #000a16;
+  --color-oxford-blue-300: #010f21;
+  --color-oxford-blue-400: #01142c;
+  --color-oxford-blue-500: #011936;
+  --color-oxford-blue-600: #034290;
+  --color-oxford-blue-700: #056be9;
+  --color-oxford-blue-800: #4d9cfb;
+  --color-oxford-blue-900: #a6cdfd;
+  --color-charcoal: #465362;
+  --color-charcoal-100: #0e1114;
+  --color-charcoal-200: #1c2127;
+  --color-charcoal-300: #2a323b;
+  --color-charcoal-400: #38434f;
+  --color-charcoal-500: #465362;
+  --color-charcoal-600: #62758a;
+  --color-charcoal-700: #8797aa;
+  --color-charcoal-800: #afbac6;
+  --color-charcoal-900: #d7dce3;
+  --color-primary: #ed254e;
+  --color-accent: #f9dc5c;
+  --color-success: #c2eabd;
+  --color-base: #011936;
+  --color-muted: #465362;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0c1511;
-    --foreground: #eefaf3;
-    --accent-soft: rgba(16, 61, 44, 0.65);
-    --glass-bg: rgba(18, 46, 34, 0.92);
-    --glass-border: rgba(67, 160, 120, 0.35);
-    --glass-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.55);
+    --background: #01142c;
+    --foreground: #fdf1be;
+    --accent-soft: rgba(249, 220, 92, 0.2);
+    --glass-bg: rgba(9, 23, 45, 0.92);
+    --glass-border: rgba(249, 220, 92, 0.25);
+    --glass-shadow: 0 30px 60px -30px rgba(1, 25, 54, 0.6);
   }
 }
 
@@ -69,7 +124,7 @@ h4 {
 }
 
 .btn-primary {
-  @apply bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold py-2 px-4 rounded-lg transition-all;
+  @apply bg-gradient-to-br from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 text-base font-semibold text-oxford-blue-500 py-2 px-4 rounded-lg transition-all;
 }
 .btn-primary:hover {
   @apply shadow-lg translate-y-[-1px];

@@ -29,12 +29,12 @@ const Modal = ({ isOpen, title, children, onClose, actions }: ModalProps) => {
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.96, opacity: 0, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="w-full max-w-md rounded-3xl border border-emerald-200/70 bg-white/95 p-6 shadow-2xl shadow-emerald-200"
+            className="w-full max-w-md rounded-3xl border border-tea-green-700 bg-white/95 p-6 shadow-2xl shadow-charcoal-900/30"
           >
             {title && (
-              <h3 className="mb-3 text-lg font-semibold text-emerald-600">{title}</h3>
+              <h3 className="mb-3 text-lg font-semibold text-oxford-blue-500">{title}</h3>
             )}
-            <div className="mb-5 text-sm text-emerald-600">{children}</div>
+            <div className="mb-5 text-sm text-charcoal-500">{children}</div>
             {actions && <div className="flex justify-end gap-2">{actions}</div>}
           </motion.div>
         </motion.div>

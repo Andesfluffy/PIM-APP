@@ -10,6 +10,13 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
+const isConfigValid = Object.values(firebaseConfig).every(
+  (value) => typeof value === "string" && value.length > 0,
+);
+
+const app =
+  isConfigValid && !getApps().length ? initializeApp(firebaseConfig) : isConfigValid ? getApp() : undefined;
+
+export const auth = app ? getAuth(app) : undefined;
 export const googleProvider = app ? new GoogleAuthProvider() : undefined;
+export const firebaseReady = Boolean(app);
