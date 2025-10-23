@@ -1,12 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import BackButton from "@/components/BackButton";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 
-<BackButton />;
-
-const inter = Inter({ subsets: ["latin"] });
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "PIM App",
@@ -21,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.className} bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen text-white`}
+        className={`${plusJakarta.className} bg-[#e7f1ec] text-[#103126] min-h-screen antialiased`}
       >
         <AuthProvider>{children}</AuthProvider>
       </body>
