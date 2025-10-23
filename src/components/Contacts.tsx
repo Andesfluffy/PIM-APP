@@ -109,21 +109,26 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
   );
 
   return (
-    <div className="glass-card rounded-3xl border border-rose-200/60 p-6 shadow-lg shadow-rose-100">
+    <div className="glass-card rounded-3xl border border-emerald-200/70 bg-white/80 p-6 shadow-[0_32px_70px_-40px_rgba(12,74,48,0.55)] backdrop-blur">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="flex items-center gap-3 text-3xl font-bold text-rose-600">
-            <span className="text-4xl">📇</span>
+          <h2 className="flex items-center gap-3 text-3xl font-bold text-emerald-600">
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
+              <svg viewBox="0 0 24 24" className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden>
+                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0z" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M6 19a6 6 0 0112 0" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
             Contacts
           </h2>
-          <p className="text-sm text-rose-500">Cherish every connection in one pretty place.</p>
+          <p className="text-sm text-emerald-500">Cherish every connection in one pretty place.</p>
         </div>
         <button
           onClick={() => {
             setIsCreating(true);
             setFormErrors({});
           }}
-          className="rounded-2xl bg-gradient-to-r from-rose-400 via-pink-300 to-amber-300 px-5 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
+          className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-5 py-2 text-sm font-semibold text-emerald-900 shadow-md shadow-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-200"
         >
           + New Contact
         </button>
@@ -139,7 +144,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           placeholder="Search contacts..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-2xl border border-rose-200/70 bg-white/80 px-4 py-3 text-rose-700 placeholder:text-rose-300 shadow-inner focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
+          className="w-full rounded-2xl border border-emerald-200/70 bg-white/80 px-4 py-3 text-emerald-700 placeholder:text-emerald-300 shadow-inner focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
         />
       </div>
 
@@ -147,11 +152,11 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 rounded-2xl border border-rose-200/70 bg-white/85 p-5 shadow-md"
+          className="mb-6 rounded-2xl border border-emerald-200/70 bg-white/85 p-5 shadow-lg shadow-emerald-100"
         >
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-name">
+              <label className="mb-1 block text-sm font-semibold text-emerald-600" htmlFor="contact-name">
                 Name
               </label>
               <input
@@ -166,18 +171,18 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                     setFormErrors((prev) => ({ ...prev, name: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-emerald-700 placeholder:text-emerald-300 focus:outline-none focus:ring-2 ${
                   formErrors.name
-                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
-                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
+                    : "border-emerald-200 bg-white/70 focus:border-emerald-300 focus:ring-emerald-200"
                 }`}
               />
               {formErrors.name && (
-                <p className="mt-1 text-sm text-rose-500">{formErrors.name}</p>
+                <p className="mt-1 text-sm text-emerald-600">{formErrors.name}</p>
               )}
             </div>
             <div>
-              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-email">
+              <label className="mb-1 block text-sm font-semibold text-emerald-600" htmlFor="contact-email">
                 Email
               </label>
               <input
@@ -192,19 +197,19 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                     setFormErrors((prev) => ({ ...prev, email: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-emerald-700 placeholder:text-emerald-300 focus:outline-none focus:ring-2 ${
                   formErrors.email
-                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
-                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                    ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
+                    : "border-emerald-200 bg-white/70 focus:border-emerald-300 focus:ring-emerald-200"
                 }`}
               />
               {formErrors.email && (
-                <p className="mt-1 text-sm text-rose-500">{formErrors.email}</p>
+                <p className="mt-1 text-sm text-emerald-600">{formErrors.email}</p>
               )}
             </div>
           </div>
           <div className="mt-4">
-            <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="contact-phone">
+            <label className="mb-1 block text-sm font-semibold text-emerald-600" htmlFor="contact-phone">
               Phone (optional)
             </label>
             <input
@@ -219,27 +224,27 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
                   setFormErrors((prev) => ({ ...prev, phone: undefined }));
                 }
               }}
-              className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+              className={`w-full rounded-xl border px-4 py-3 text-emerald-700 placeholder:text-emerald-300 focus:outline-none focus:ring-2 ${
                 formErrors.phone
-                  ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
-                  : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                  ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
+                  : "border-emerald-200 bg-white/70 focus:border-emerald-300 focus:ring-emerald-200"
               }`}
             />
             {formErrors.phone && (
-              <p className="mt-1 text-sm text-rose-500">{formErrors.phone}</p>
+              <p className="mt-1 text-sm text-emerald-600">{formErrors.phone}</p>
             )}
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingContact ? handleUpdate : handleCreate}
-              className="rounded-xl bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 px-4 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
+              className="rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-md shadow-emerald-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-200"
             >
               {editingContact ? "Update" : "Create"}
             </button>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-400 transition-colors hover:border-rose-300 hover:text-rose-500"
+              className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
             >
               Cancel
             </button>
@@ -253,73 +258,51 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
             key={contact.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-rose-200/70 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-rose-300 hover:shadow-md"
+            className="rounded-2xl border border-emerald-200/70 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md"
           >
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-rose-300 to-pink-200 text-lg font-bold text-rose-700">
-                {contact.name
-                  .split(" ")
-                  .map((n) => n[0])
-                  .join("")
-                  .toUpperCase()
-                  .substring(0, 2)}
+            <div className="mb-2 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-700">{contact.name}</h3>
+                <p className="text-sm text-emerald-500">{contact.email}</p>
+                {contact.phone && (
+                  <p className="text-sm text-emerald-500/80">{contact.phone}</p>
+                )}
               </div>
-              <div className="flex-1">
-                <div className="mb-2 flex items-start justify-between gap-3">
-                  <h3 className="text-lg font-semibold text-rose-600">{contact.name}</h3>
-                  <div className="flex gap-2 text-lg">
-                    <button
-                      onClick={() => startEdit(contact)}
-                      className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
-                      aria-label="Edit contact"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => setContactToDelete(contact)}
-                      className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
-                      aria-label="Delete contact"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-                <div className="space-y-1 text-sm">
-                  <p className="flex items-center gap-2 text-rose-500">
-                    <span>📧</span>
-                    <a
-                      href={`mailto:${contact.email}`}
-                      className="text-rose-500 underline decoration-rose-300 decoration-dotted underline-offset-4 hover:text-rose-600"
-                    >
-                      {contact.email}
-                    </a>
-                  </p>
-                  {contact.phone && (
-                    <p className="flex items-center gap-2 text-rose-500">
-                      <span>📞</span>
-                      <a
-                        href={`tel:${contact.phone}`}
-                        className="text-rose-500 underline decoration-rose-300 decoration-dotted underline-offset-4 hover:text-rose-600"
-                      >
-                        {contact.phone}
-                      </a>
-                    </p>
-                  )}
-                </div>
-                <div className="mt-4 flex flex-wrap items-center justify-between text-xs text-rose-300">
-                  <span>Created: {new Date(contact.createdAt).toLocaleDateString()}</span>
-                  <span>Updated: {new Date(contact.updatedAt).toLocaleDateString()}</span>
-                </div>
+              <div className="flex gap-2 text-lg">
+                <button
+                  onClick={() => startEdit(contact)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all hover:bg-emerald-200"
+                  aria-label="Edit contact"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M16.862 4.487l2.651 2.651m-9.193 9.193l-3.34.689.688-3.34 9.194-9.193a1.875 1.875 0 012.651 2.651l-9.193 9.193z" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setContactToDelete(contact)}
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all hover:bg-emerald-200"
+                  aria-label="Delete contact"
+                >
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7m1 0v11a2 2 0 01-2 2H10a2 2 0 01-2-2V7m3 4v6m4-6v6" />
+                  </svg>
+                </button>
               </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-between text-xs text-emerald-400">
+              <span>Created: {new Date(contact.createdAt).toLocaleDateString()}</span>
+              {contact.updatedAt && (
+                <span>Updated: {new Date(contact.updatedAt).toLocaleDateString()}</span>
+              )}
             </div>
           </motion.div>
         ))}
 
         {filteredContacts.length === 0 && (
-          <div className="py-10 text-center text-rose-400">
+          <div className="py-10 text-center text-emerald-400">
             {searchTerm
               ? "No contacts found matching your search."
-              : "No contacts yet. Add your first contact!"}
+              : "No contacts yet. Add your first one!"}
           </div>
         )}
       </div>
@@ -327,7 +310,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="text-sm font-semibold text-rose-500 transition-colors hover:text-rose-600"
+          className="text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
         >
           ← Back to dashboard
         </button>
