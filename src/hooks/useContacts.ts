@@ -95,16 +95,23 @@ export function useContacts(userId: string | undefined) {
   useEffect(() => {
     if (userId) {
       fetch(`/api/contacts?userId=${userId}`)
-        .then((res) => res.json())
-        .then((data) =>
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
           setContacts(
-            data.map((c: any) => ({
+            list.map((c: any) => ({
               id: c._id,
               ...c,
             }))
-          )
-        )
-        .catch(console.error);
+          );
+        })
+        .catch((err) => {
+          console.error("GET /api/contacts failed", err);
+          setContacts([]);
+        });
     }
   }, [userId]);
 

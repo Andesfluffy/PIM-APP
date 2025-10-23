@@ -98,16 +98,23 @@ export function useTasks(userId: string | undefined) {
   useEffect(() => {
     if (userId) {
       fetch(`/api/tasks?userId=${userId}`)
-        .then((res) => res.json())
-        .then((data) =>
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
           setTasks(
-            data.map((t: any) => ({
+            list.map((t: any) => ({
               id: t._id,
               ...t,
             }))
-          )
-        )
-        .catch(console.error);
+          );
+        })
+        .catch((err) => {
+          console.error("GET /api/tasks failed", err);
+          setTasks([]);
+        });
     }
   }, [userId]);
 

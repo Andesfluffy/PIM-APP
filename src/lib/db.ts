@@ -42,6 +42,12 @@ async function createTables() {
 }
 
 export async function ensureDatabase() {
+  // Ensure a Postgres connection string is configured
+  if (!process.env.POSTGRES_URL && !process.env.POSTGRES_URL_NON_POOLING) {
+    throw new Error(
+      "Missing Postgres connection string. Set POSTGRES_URL (or POSTGRES_URL_NON_POOLING) in .env.local."
+    );
+  }
   if (initialized) return;
   await createTables();
   initialized = true;
