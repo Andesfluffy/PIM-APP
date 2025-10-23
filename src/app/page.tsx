@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import LoginButton from "@/components/LoginButton";
 import Notes from "@/components/Notes";
@@ -11,23 +12,43 @@ import { useAuth } from "@/context/AuthContext";
 
 type View = "auth" | "dashboard" | "notes" | "tasks" | "contacts";
 
+type AuthField = {
+  id: string;
+  label: string;
+  type: string;
+  placeholder: string;
+  inputMode?: "text" | "email" | "numeric" | "tel";
+};
+
+const heroImage =
+  "https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1600&q=80";
+
+const authFields: AuthField[] = [
+  {
+    id: "name",
+    label: "Name",
+    type: "text",
+    placeholder: "Your full name",
+  },
+  {
+    id: "email",
+    label: "Email address",
+    type: "email",
+    inputMode: "email",
+    placeholder: "you@example.com",
+  },
+  {
+    id: "password",
+    label: "Password",
+    type: "password",
+    placeholder: "Create a secure password",
+  },
+];
+
 export default function HomePage() {
   const [view, setView] = useState<View>("auth");
   const { user, logout, loading } = useAuth();
   const isAuthenticated = !!user;
-
-  const petals = useMemo(
-    () =>
-      Array.from({ length: 18 }, () => ({
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        duration: 8 + Math.random() * 4,
-        delay: Math.random() * 4,
-        drift: Math.random() * 20 + 10,
-        rotation: Math.random() * 12,
-      })),
-    []
-  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -39,11 +60,11 @@ export default function HomePage() {
 
   if (loading) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-rose-50 via-pink-100 to-amber-50">
+      <main className="flex min-h-screen items-center justify-center bg-[#f2f5f1]">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "linear" }}
-          className="h-16 w-16 rounded-full border-4 border-rose-400 border-t-transparent"
+          transition={{ duration: 1.6, repeat: Infinity, ease: "linear" }}
+          className="h-14 w-14 rounded-full border-4 border-emerald-500/60 border-t-transparent"
         />
       </main>
     );
@@ -55,277 +76,237 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-gradient-to-br from-rose-50 via-pink-100 to-amber-50">
-      {isAuthenticated && user && (
-        <UserProfile user={user} onSignOut={handleSignOut} />
-      )}
+    <main className="relative min-h-screen bg-gradient-to-br from-[#eef3ed] via-[#f5f7f2] to-[#e2ece3] text-[#102a1f]">
+      {isAuthenticated && user && <UserProfile user={user} onSignOut={handleSignOut} />}
 
-      {/* Background petals */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-32 -right-20 h-72 w-72 rounded-full bg-rose-300/30 blur-3xl" />
-        <div className="absolute -bottom-32 -left-10 h-96 w-96 rounded-full bg-pink-200/40 blur-3xl" />
-        <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-amber-200/30 blur-3xl" />
-        <div className="absolute bottom-10 right-1/4 h-56 w-56 rounded-full bg-rose-200/40 blur-3xl" />
+      <AnimatePresence mode="wait">
+        {!isAuthenticated && view === "auth" ? (
+          <motion.section
+            key="auth"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
+            className="grid min-h-screen grid-cols-1 lg:grid-cols-[minmax(0,460px)_1fr]"
+          >
+            <div className="flex flex-col justify-between bg-white px-6 py-10 sm:px-12 lg:px-16">
+              <div>
+                <div className="flex items-center gap-3 text-emerald-700">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-emerald-600/10 text-2xl">🌿</span>
+                  <span className="text-lg font-semibold tracking-wide text-emerald-800">
+                    Verdant PIM
+                  </span>
+                </div>
+                <h1 className="mt-12 text-4xl font-semibold text-[#102a1f] sm:text-5xl">
+                  Get started now
+                </h1>
+                <p className="mt-4 text-base text-slate-500">
+                  Create a serene hub for your notes, tasks, and contacts. Everything stays
+                  organised so you can stay inspired.
+                </p>
+              </div>
 
-        {petals.map((petal, index) => (
-          <motion.div
-            key={`petal-${index}`}
-            className="absolute h-3 w-3 rounded-full bg-rose-300/70 shadow-[0_0_12px_rgba(251,113,133,0.45)]"
-            animate={{
-              y: [0, -petal.drift, 0],
-              rotate: [0, petal.rotation, -petal.rotation / 2, 0],
-            }}
-            transition={{
-              duration: petal.duration,
-              repeat: Infinity,
-              delay: petal.delay,
-              ease: "easeInOut",
-            }}
-            style={{
-              left: `${petal.left}%`,
-              top: `${petal.top}%`,
-            }}
-          />
-        ))}
-      </div>
+              <div className="mt-12 space-y-6">
+                <div className="space-y-5">
+                  {authFields.map((field) => (
+                    <label key={field.id} htmlFor={field.id} className="block text-left">
+                      <span className="text-sm font-medium text-slate-600">{field.label}</span>
+                      <input
+                        id={field.id}
+                        type={field.type}
+                        inputMode={field.inputMode}
+                        placeholder={field.placeholder}
+                        className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 shadow-sm transition focus:border-emerald-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-emerald-200/60"
+                      />
+                    </label>
+                  ))}
+                  <p className="text-xs text-slate-400">
+                    Personal sign up is coming soon. Use your Google account to access the full workspace today.
+                  </p>
+                </div>
 
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 sm:px-8 lg:px-16">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={view}
+                <LoginButton variant="solid" fullWidth>
+                  Sign in with Google
+                </LoginButton>
+
+                <button
+                  type="button"
+                  onClick={() => setView("notes")}
+                  className="w-full rounded-xl border border-transparent bg-transparent px-4 py-3 text-sm font-semibold text-emerald-600 transition hover:text-emerald-700 focus-visible:outline focus-visible:outline-emerald-500"
+                >
+                  Preview the workspace
+                </button>
+              </div>
+            </div>
+
+            <div className="relative hidden overflow-hidden lg:block">
+              <Image
+                src={heroImage}
+                alt="Lush monstera leaves"
+                fill
+                priority
+                sizes="(min-width: 1024px) calc(100vw - 460px), 100vw"
+                className="object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-br from-black/10 via-transparent to-black/30" />
+              <div className="absolute bottom-12 left-12 max-w-sm rounded-3xl bg-black/20 p-6 text-white backdrop-blur-md">
+                <p className="text-xs uppercase tracking-[0.3em] text-white/70">Verdant focus</p>
+                <p className="mt-4 text-lg font-medium text-white">
+                  Flow through your day with clarity. Bring your ideas, plans, and people together in a calming space.
+                </p>
+              </div>
+            </div>
+          </motion.section>
+        ) : (
+          <motion.section
+            key="workspace"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="w-full max-w-6xl"
+            className="relative flex min-h-screen items-center justify-center px-4 py-12 sm:px-8 lg:px-16"
           >
-            {/* AUTH VIEW */}
-            {!isAuthenticated && view === "auth" && (
-              <div className="space-y-12 text-center">
-                <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
-                >
-                  <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-rose-400 to-pink-300 text-3xl shadow-lg shadow-rose-200">
-                    🌸
-                  </div>
-                  <h1 className="text-4xl font-black text-rose-600 sm:text-5xl md:text-6xl">
-                    BlushBloom PIM
-                  </h1>
-                  <p className="mt-4 text-lg font-medium text-rose-500 md:text-xl">
-                    The prettiest place to keep your notes, tasks, and contacts in perfect harmony.
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25, duration: 0.4 }}
-                  className="flex flex-col items-center justify-center gap-4 sm:flex-row"
-                >
-                  <LoginButton />
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.96 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.35, duration: 0.4 }}
-                  className="grid grid-cols-1 gap-6 md:grid-cols-3"
-                >
-                  {[
-                    {
-                      icon: "📝",
-                      title: "Dreamy Notes",
-                      description:
-                        "Capture sparks of inspiration with rich formatting and instant search.",
-                    },
-                    {
-                      icon: "✅",
-                      title: "Chic Tasks",
-                      description:
-                        "Plan your days with color-coded priorities and due-date reminders.",
-                    },
-                    {
-                      icon: "📇",
-                      title: "Sweet Contacts",
-                      description:
-                        "Keep every bestie and business bestie organized and easy to reach.",
-                    },
-                  ].map((feature) => (
-                    <div
-                      key={feature.title}
-                      className="glass-card group rounded-3xl border border-rose-200/60 p-6 text-left shadow-lg shadow-rose-100 transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-rose-200"
-                    >
-                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-200 to-pink-200 text-2xl">
-                        {feature.icon}
-                      </div>
-                      <h3 className="text-xl font-semibold text-rose-600">{feature.title}</h3>
-                      <p className="mt-2 text-sm text-rose-500">{feature.description}</p>
-                    </div>
-                  ))}
-                </motion.div>
-              </div>
-            )}
-
-            {/* DASHBOARD VIEW */}
-            {isAuthenticated && user && view === "dashboard" && (
-              <div className="space-y-12 text-center">
-                <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
-                  <h1 className="text-4xl font-black text-rose-600 sm:text-5xl">
-                    Welcome back, {user.name.split(" ")[0]}!
-                  </h1>
-                  <p className="mt-3 text-lg font-medium text-rose-500 md:text-xl">
-                    Let&apos;s make something beautiful and productive today.
-                  </p>
-                </motion.div>
-
-                <motion.div
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="grid grid-cols-1 gap-6 md:grid-cols-3"
-                >
-                  {[
-                    {
-                      key: "notes",
-                      icon: "📝",
-                      title: "Notes",
-                      description: "Jot down and beautify your ideas",
-                      accent: "from-rose-400/60 to-pink-300/40",
-                    },
-                    {
-                      key: "tasks",
-                      icon: "✅",
-                      title: "Tasks",
-                      description: "Curate your to-do runway",
-                      accent: "from-pink-400/60 to-rose-300/40",
-                    },
-                    {
-                      key: "contacts",
-                      icon: "📇",
-                      title: "Contacts",
-                      description: "Celebrate your connections",
-                      accent: "from-amber-300/60 to-pink-200/40",
-                    },
-                  ].map((card) => (
-                    <button
-                      key={card.key}
-                      onClick={() => setView(card.key as View)}
-                      className="group relative overflow-hidden rounded-3xl border border-rose-200/60 bg-white/60 p-8 text-left shadow-lg shadow-rose-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    >
-                      <div className="relative z-10">
-                        <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-100 to-pink-100 text-3xl">
-                          {card.icon}
-                        </div>
-                        <h3 className="text-2xl font-semibold text-rose-600">{card.title}</h3>
-                        <p className="mt-2 text-sm text-rose-500">{card.description}</p>
-                      </div>
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${card.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
-                      />
-                    </button>
-                  ))}
-                </motion.div>
-              </div>
-            )}
-
-            {/* FEATURE VIEWS */}
-            {isAuthenticated && view !== "dashboard" && view !== "auth" && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <button
-                  onClick={() => setView("dashboard")}
-                  className="group inline-flex items-center gap-2 text-sm font-semibold text-rose-500 transition-colors hover:text-rose-600"
-                >
-                  <span className="transition-transform group-hover:-translate-x-1">←</span>
-                  Back to dashboard
-                </button>
-
-                <div>
-                  {view === "notes" && (
-                    <Notes
-                      userId={user.id}
-                      onBackToDashboard={() => setView("dashboard")}
-                    />
-                  )}
-                  {view === "tasks" && (
-                    <Tasks
-                      userId={user.id}
-                      onBackToDashboard={() => setView("dashboard")}
-                    />
-                  )}
-                  {view === "contacts" && (
-                    <Contacts
-                      userId={user.id}
-                      onBackToDashboard={() => setView("dashboard")}
-                    />
-                  )}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Allow unauthenticated users to preview features */}
-            {!isAuthenticated && view !== "auth" && (
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <button
-                  onClick={() => setView("auth")}
-                  className="group inline-flex items-center gap-2 text-sm font-semibold text-rose-500 transition-colors hover:text-rose-600"
-                >
-                  <span className="transition-transform group-hover:-translate-x-1">←</span>
-                  Back to sign in
-                </button>
-
-                <div className="text-center">
-                  <div className="glass-card mx-auto mb-8 max-w-2xl rounded-3xl border border-rose-200/60 p-8 shadow-lg shadow-rose-100">
-                    <h2 className="text-2xl font-semibold text-rose-600">🔒 Preview Mode</h2>
-                    <p className="mt-3 text-sm text-rose-500">
-                      Sign in to keep your gorgeous workspace in sync across every device.
+            <div className="w-full max-w-6xl space-y-12">
+              {isAuthenticated && user && view === "dashboard" && (
+                <div className="space-y-12 text-center">
+                  <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}>
+                    <h1 className="text-4xl font-semibold text-emerald-800 sm:text-5xl">
+                      Welcome back, {user.name.split(" ")[0]}!
+                    </h1>
+                    <p className="mt-3 text-lg text-emerald-600 md:text-xl">
+                      Let&apos;s create a calm, intentional day.
                     </p>
-                    <div className="mt-6 flex justify-center">
-                      <LoginButton />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="grid grid-cols-1 gap-6 md:grid-cols-3"
+                  >
+                    {[
+                      {
+                        key: "notes",
+                        icon: "🗒️",
+                        title: "Notes",
+                        description: "Capture ideas with structure and style",
+                        accent: "from-emerald-100/80 via-transparent to-emerald-200/70",
+                      },
+                      {
+                        key: "tasks",
+                        icon: "✅",
+                        title: "Tasks",
+                        description: "Plan a focused, achievable to-do list",
+                        accent: "from-teal-100/80 via-transparent to-teal-200/70",
+                      },
+                      {
+                        key: "contacts",
+                        icon: "📇",
+                        title: "Contacts",
+                        description: "Keep relationships thriving effortlessly",
+                        accent: "from-lime-100/80 via-transparent to-lime-200/70",
+                      },
+                    ].map((card) => (
+                      <button
+                        key={card.key}
+                        onClick={() => setView(card.key as View)}
+                        className="group relative overflow-hidden rounded-3xl border border-emerald-100/70 bg-white/80 p-8 text-left shadow-[0_26px_55px_-28px_rgba(13,68,45,0.35)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_32px_60px_-26px_rgba(13,68,45,0.45)] backdrop-blur"
+                      >
+                        <div className="relative z-10">
+                          <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-3xl">
+                            {card.icon}
+                          </div>
+                          <h3 className="text-2xl font-semibold text-emerald-800">{card.title}</h3>
+                          <p className="mt-2 text-sm text-emerald-600">{card.description}</p>
+                        </div>
+                        <div
+                          className={`absolute inset-0 bg-gradient-to-br ${card.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                        />
+                      </button>
+                    ))}
+                  </motion.div>
+                </div>
+              )}
+
+              {isAuthenticated && view !== "dashboard" && view !== "auth" && user && (
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                  <button
+                    onClick={() => setView("dashboard")}
+                    className="group inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                  >
+                    <span className="transition-transform group-hover:-translate-x-1">←</span>
+                    Back to dashboard
+                  </button>
+
+                  <div>
+                    {view === "notes" && (
+                      <Notes
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                    {view === "tasks" && (
+                      <Tasks
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                    {view === "contacts" && (
+                      <Contacts
+                        userId={user.id}
+                        onBackToDashboard={() => setView("dashboard")}
+                      />
+                    )}
+                  </div>
+                </motion.div>
+              )}
+
+              {!isAuthenticated && view !== "auth" && (
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                  <button
+                    onClick={() => setView("auth")}
+                    className="group inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 transition hover:text-emerald-700"
+                  >
+                    <span className="transition-transform group-hover:-translate-x-1">←</span>
+                    Back to sign in
+                  </button>
+
+                  <div className="text-center">
+                    <div className="surface-card mx-auto mb-8 max-w-2xl rounded-3xl border border-emerald-100/70 p-8 text-[#133327]">
+                      <h2 className="text-2xl font-semibold text-emerald-800">🔒 Preview Mode</h2>
+                      <p className="mt-3 text-sm text-emerald-600">
+                        Sign in with Google to keep your tranquil workspace synced across every device.
+                      </p>
+                      <div className="mt-6 flex justify-center">
+                        <LoginButton variant="solid" />
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div>
-                  {view === "notes" && (
-                    <Notes onBackToDashboard={() => setView("auth")} />
-                  )}
-                  {view === "tasks" && (
-                    <Tasks onBackToDashboard={() => setView("auth")} />
-                  )}
-                  {view === "contacts" && (
-                    <Contacts onBackToDashboard={() => setView("auth")} />
-                  )}
-                </div>
-              </motion.div>
-            )}
-          </motion.div>
-        </AnimatePresence>
-      </div>
+                  <div>
+                    {view === "notes" && (
+                      <Notes onBackToDashboard={() => setView("auth")} />
+                    )}
+                    {view === "tasks" && (
+                      <Tasks onBackToDashboard={() => setView("auth")} />
+                    )}
+                    {view === "contacts" && (
+                      <Contacts onBackToDashboard={() => setView("auth")} />
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
 
       <style jsx global>{`
-        .glass-card {
-          background: rgba(255, 245, 248, 0.82);
-          backdrop-filter: blur(26px);
-          -webkit-backdrop-filter: blur(26px);
-          border: 1px solid rgba(244, 114, 182, 0.28);
-          box-shadow: 0 20px 40px -24px rgba(244, 114, 182, 0.45);
-        }
-
-        .glass {
-          background: rgba(255, 245, 248, 0.9);
-          backdrop-filter: blur(26px);
-          -webkit-backdrop-filter: blur(26px);
-          border: 1px solid rgba(244, 114, 182, 0.28);
+        .surface-card {
+          background: rgba(255, 255, 255, 0.85);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          box-shadow: 0 30px 60px -30px rgba(12, 62, 41, 0.45);
         }
       `}</style>
     </main>

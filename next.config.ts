@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
   // Configure images
   images: {
     // Configure domains if you're using external images
-    domains: [],
+    domains: ["images.unsplash.com"],
     // Disable image optimization to prevent build issues
     unoptimized: true,
   },
