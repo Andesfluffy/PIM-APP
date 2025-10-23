@@ -96,21 +96,21 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-8"
+            className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12 sm:px-6"
           >
-            <div className="relative flex h-[min(720px,92vh)] w-full max-w-6xl flex-col justify-center gap-10 rounded-[40px] border border-emerald-200/60 bg-white/80 px-8 py-10 shadow-[0_60px_120px_-70px_rgba(12,74,48,0.55)] backdrop-blur-xl lg:flex-row lg:items-center lg:px-14">
-              <div className="flex w-full flex-col gap-10 lg:w-[52%]">
+            <div className="relative flex w-full max-w-5xl flex-col justify-center gap-12 rounded-[36px] border border-emerald-200/60 bg-white/85 px-6 py-10 shadow-[0_60px_120px_-70px_rgba(12,74,48,0.55)] backdrop-blur-xl sm:px-10 lg:flex-row lg:items-center lg:gap-14 lg:px-16">
+              <div className="flex w-full flex-col gap-10 lg:w-[48%]">
                 <div className="space-y-6">
-                  <div className="inline-flex items-center gap-3 rounded-full bg-emerald-100/80 px-4 py-2 text-sm font-semibold text-emerald-700">
-                    <span className="text-xl">🌿</span>
+                  <div className="inline-flex items-center gap-3 rounded-full bg-emerald-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-emerald-700 sm:text-sm">
+                    <span className="text-lg sm:text-xl">🌿</span>
                     Verdant workspace
                   </div>
                   <div className="space-y-4">
                     <h1 className="text-4xl leading-tight text-[#0f2d22] sm:text-5xl lg:text-6xl">
-                      A calmer command centre for your day.
+                      A composed command centre for your day.
                     </h1>
-                    <p className="type-subtle text-base leading-relaxed text-emerald-600/80">
-                      Seamlessly orchestrate notes, priorities, and relationships in an interface that feels curated and contemporary. Sign in once and every surface syncs in real time.
+                    <p className="type-subtle text-base leading-relaxed text-emerald-600/85">
+                      Gather notes, priorities, and relationships inside a deliberate rhythm. Sign in once and every surface stays aligned in the background.
                     </p>
                   </div>
                 </div>
@@ -129,19 +129,19 @@ export default function HomePage() {
                       onClick={() => setView("notes")}
                       className="type-subtle inline-flex items-center justify-center rounded-2xl border border-emerald-200/70 px-4 py-3 text-sm font-semibold text-emerald-600 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-700"
                     >
-                      Explore the live preview
+                      Tour the live suite
                     </button>
                   </div>
                   <p className="type-subtle text-xs text-emerald-500/70">
-                    Google sign-in unlocks the full workspace today. Personal email onboarding is on the way.
+                    Google sign-in unlocks the full workspace now. Personal email onboarding is arriving soon.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 text-sm text-emerald-600/80">
+                <div className="grid grid-cols-1 gap-4 text-sm text-emerald-600/80 sm:grid-cols-2 lg:grid-cols-3">
                   {quickMetrics.map((metric) => (
                     <div
                       key={metric.label}
-                      className="rounded-2xl border border-emerald-100/60 bg-emerald-50/50 p-4 text-center"
+                      className="rounded-2xl border border-emerald-100/60 bg-emerald-50/60 p-4 text-center"
                     >
                       <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">{metric.label}</p>
                       <p className="mt-2 text-lg font-semibold text-emerald-700">{metric.value}</p>
@@ -150,8 +150,8 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="grid w-full flex-1 gap-4">
-                <div className="relative h-52 overflow-hidden rounded-[28px] border border-emerald-100/70">
+              <div className="grid w-full flex-1 gap-4 lg:grid-rows-[minmax(0,1fr)_minmax(0,1fr)]">
+                <div className="relative h-56 overflow-hidden rounded-[28px] border border-emerald-100/70 sm:h-64">
                   <Image
                     src={heroImage}
                     alt="Verdant workspace preview"
@@ -161,10 +161,10 @@ export default function HomePage() {
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/80 p-4 text-[#123327] shadow-[0_25px_45px_-35px_rgba(12,74,48,0.65)] backdrop-blur">
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Preview</p>
+                  <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/85 p-4 text-[#123327] shadow-[0_25px_45px_-35px_rgba(12,74,48,0.65)] backdrop-blur">
+                    <p className="text-[11px] uppercase tracking-[0.4em] text-emerald-400">Preview</p>
                     <p className="mt-2 text-sm font-semibold text-emerald-800">
-                      Flow through notes, tasks, and contacts without losing your sense of calm.
+                      Flow through notes, tasks, and contacts without trading precision for calm.
                     </p>
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export default function HomePage() {
                   {featureTiles.map((feature) => (
                     <div
                       key={feature.key}
-                      className="group relative overflow-hidden rounded-3xl border border-emerald-100/70 bg-white/75 p-6 shadow-[0_32px_60px_-45px_rgba(12,74,48,0.55)] backdrop-blur-md"
+                      className="group relative flex min-h-[180px] flex-col justify-between overflow-hidden rounded-3xl border border-emerald-100/70 bg-white/75 p-6 shadow-[0_32px_60px_-45px_rgba(12,74,48,0.55)] backdrop-blur-md"
                     >
                       <div
                         className={`absolute inset-0 bg-gradient-to-br ${feature.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
