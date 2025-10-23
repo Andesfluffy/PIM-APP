@@ -36,10 +36,10 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const validateForm = () => {
     const errors: NoteErrors = {};
     if (!newNote.title.trim()) {
-      errors.title = "A darling title is required.";
+      errors.title = "Please provide a note title.";
     }
     if (!newNote.content.trim()) {
-      errors.content = "Don&apos;t forget to add your note content.";
+      errors.content = "Note content cannot be empty.";
     }
     setFormErrors(errors);
     return errors;
@@ -48,7 +48,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const handleCreate = () => {
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      setAlertMsg("Please fix the highlighted note fields before saving.");
+      setAlertMsg("Resolve the highlighted fields before saving the note.");
       return;
     }
 
@@ -60,7 +60,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
     if (!editingNote) return;
     const errors = validateForm();
     if (Object.keys(errors).length > 0) {
-      setAlertMsg("Please fix the highlighted note fields before updating.");
+      setAlertMsg("Resolve the highlighted fields before updating the note.");
       return;
     }
 
@@ -85,74 +85,60 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   );
 
   return (
-    <div className="glass-card rounded-3xl border border-emerald-200/70 bg-white/80 p-6 shadow-[0_32px_70px_-40px_rgba(12,74,48,0.55)] backdrop-blur">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h2 className="flex items-center gap-3 text-3xl font-bold text-emerald-600">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
-              <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden>
-                <path
-                  d="M7 3h10a2 2 0 012 2v11.586a2 2 0 01-.586 1.414l-2.414 2.414A2 2 0 0114.586 21H7a2 2 0 01-2-2V5a2 2 0 012-2z"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M9 9h6m-6 4h3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+    <div className="rounded-[32px] border border-emerald-100/70 bg-white/80 p-8 shadow-[0_40px_80px_-55px_rgba(12,74,48,0.6)] backdrop-blur-xl">
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-6">
+        <div className="space-y-2">
+          <div className="inline-flex items-center gap-3 rounded-full bg-emerald-100/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-500">
             Notes
-          </h2>
-          <p className="text-sm text-emerald-500">Capture your thoughts in gorgeous detail.</p>
+          </div>
+          <h2 className="text-3xl text-emerald-800">Curate your ideas with polish</h2>
+          <p className="type-subtle text-sm text-emerald-600/80">
+            Layer thoughts, outlines, and inspiration in a tranquil grid designed for focus.
+          </p>
         </div>
         <button
           onClick={() => {
             setIsCreating(true);
             setFormErrors({});
           }}
-          className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-5 py-2 text-sm font-semibold text-emerald-900 shadow-md shadow-emerald-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-200"
+          className="rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-6 py-3 text-sm font-semibold text-emerald-900 shadow-[0_18px_36px_-20px_rgba(16,94,67,0.45)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-emerald-200"
         >
-          + New Note
+          Add note
         </button>
       </div>
 
-      <div className="mb-5">
+      <div className="mb-6">
         <label className="sr-only" htmlFor="note-search">
           Search notes
         </label>
-        <input
-          id="note-search"
-          type="text"
-          placeholder="Search notes..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-2xl border border-emerald-200/70 bg-white/80 px-4 py-3 text-emerald-700 placeholder:text-emerald-300 shadow-inner focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
-        />
+        <div className="relative">
+          <input
+            id="note-search"
+            type="text"
+            placeholder="Search notes by title or keyword"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full rounded-2xl border border-emerald-100/70 bg-white/70 px-5 py-3 text-sm text-emerald-700 shadow-inner shadow-emerald-50 placeholder:text-emerald-200 focus:border-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-200"
+          />
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-emerald-200">🔍</span>
+        </div>
       </div>
 
       {isCreating && (
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-6 rounded-2xl border border-emerald-200/70 bg-white/85 p-5 shadow-lg shadow-emerald-100"
+          className="mb-6 rounded-2xl border border-emerald-100/70 bg-white/85 p-6 shadow-[0_20px_45px_-30px_rgba(12,74,48,0.45)]"
         >
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-5">
             <div>
-              <label className="mb-1 block text-sm font-semibold text-emerald-600" htmlFor="note-title">
+              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="note-title">
                 Title
               </label>
               <input
                 id="note-title"
                 type="text"
-                placeholder="Note title..."
+                placeholder="Give your note a title"
                 value={newNote.title}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -161,10 +147,10 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                     setFormErrors((prev) => ({ ...prev, title: undefined }));
                   }
                 }}
-                className={`w-full rounded-xl border px-4 py-3 text-emerald-700 placeholder:text-emerald-300 focus:outline-none focus:ring-2 ${
+                className={`w-full rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
                   formErrors.title
                     ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-200 bg-white/70 focus:border-emerald-300 focus:ring-emerald-200"
+                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
                 }`}
               />
               {formErrors.title && (
@@ -173,12 +159,12 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
             </div>
 
             <div>
-              <label className="mb-1 block text-sm font-semibold text-emerald-600" htmlFor="note-content">
+              <label className="mb-1.5 block text-sm font-semibold text-emerald-600" htmlFor="note-content">
                 Content
               </label>
               <textarea
                 id="note-content"
-                placeholder="Write your note..."
+                placeholder="Capture the details here"
                 value={newNote.content}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -187,10 +173,10 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                     setFormErrors((prev) => ({ ...prev, content: undefined }));
                   }
                 }}
-                className={`h-32 w-full resize-none rounded-xl border px-4 py-3 text-emerald-700 placeholder:text-emerald-300 focus:outline-none focus:ring-2 ${
+                className={`h-36 w-full resize-none rounded-xl border px-4 py-3 text-sm text-emerald-700 placeholder:text-emerald-200 focus:outline-none focus:ring-2 ${
                   formErrors.content
                     ? "border-emerald-400 bg-emerald-50 focus:ring-emerald-300"
-                    : "border-emerald-200 bg-white/70 focus:border-emerald-300 focus:ring-emerald-200"
+                    : "border-emerald-100 bg-white/80 focus:border-emerald-300 focus:ring-emerald-200"
                 }`}
               />
               {formErrors.content && (
@@ -202,13 +188,13 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
           <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingNote ? handleUpdate : handleCreate}
-              className="rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-lime-300 px-4 py-2 text-sm font-semibold text-emerald-900 shadow-md shadow-emerald-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-200"
+              className="rounded-xl bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-[0_18px_35px_-22px_rgba(16,94,67,0.55)] transition-transform duration-200 hover:-translate-y-0.5 hover:bg-emerald-700"
             >
-              {editingNote ? "Update" : "Create"}
+              {editingNote ? "Update note" : "Create note"}
             </button>
             <button
               onClick={resetForm}
-              className="rounded-xl border border-emerald-200 bg-white px-4 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
+              className="rounded-xl border border-emerald-200 bg-white/80 px-5 py-2 text-sm font-semibold text-emerald-500 transition-colors hover:border-emerald-300 hover:text-emerald-600"
             >
               Cancel
             </button>
@@ -216,20 +202,25 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         </motion.div>
       )}
 
-      <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
+      <div className="grid max-h-[420px] grid-cols-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
         {filteredNotes.map((note) => (
           <motion.div
             key={note.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-emerald-200/70 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-md"
+            className="group rounded-2xl border border-emerald-100/70 bg-white/85 p-5 shadow-sm shadow-emerald-50 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(12,74,48,0.55)]"
           >
-            <div className="mb-2 flex items-start justify-between gap-4">
-              <h3 className="text-lg font-semibold text-emerald-700">{note.title}</h3>
+            <div className="mb-3 flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-emerald-800">{note.title}</h3>
+                <p className="type-subtle mt-1 text-xs uppercase tracking-[0.3em] text-emerald-300">
+                  {new Date(note.createdAt).toLocaleDateString()}
+                </p>
+              </div>
               <div className="flex gap-2 text-lg">
                 <button
                   onClick={() => startEdit(note)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all hover:bg-emerald-200"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 transition-all hover:bg-emerald-100"
                   aria-label="Edit note"
                 >
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -238,7 +229,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                 </button>
                 <button
                   onClick={() => setNoteToDelete(note)}
-                  className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-all hover:bg-emerald-200"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-500 transition-all hover:bg-emerald-100"
                   aria-label="Delete note"
                 >
                   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -247,23 +238,23 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
                 </button>
               </div>
             </div>
-            <p className="mb-4 whitespace-pre-wrap text-sm leading-relaxed text-emerald-600">
+            <p className="type-subtle mb-4 whitespace-pre-wrap text-sm leading-relaxed text-emerald-600/90">
               {note.content}
             </p>
-            <div className="flex flex-wrap items-center justify-between text-xs text-emerald-400">
-              <span>Created: {new Date(note.createdAt).toLocaleDateString()}</span>
-              {note.updatedAt && (
-                <span>Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
-              )}
+            <div className="flex flex-wrap items-center justify-between text-xs text-emerald-300">
+              <span>
+                Created {new Date(note.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              {note.updatedAt && <span>Updated {new Date(note.updatedAt).toLocaleDateString()}</span>}
             </div>
           </motion.div>
         ))}
 
         {filteredNotes.length === 0 && (
-          <div className="py-10 text-center text-emerald-400">
+          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-emerald-100 text-center text-emerald-300">
             {searchTerm
-              ? "No notes found matching your search."
-              : "No notes yet. Create your first note!"}
+              ? "No notes match your search just yet."
+              : "Your notebook is clear. Start by adding a new entry."}
           </div>
         )}
       </div>
@@ -271,7 +262,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
+          className="type-subtle text-sm font-semibold text-emerald-600 transition-colors hover:text-emerald-700"
         >
           ← Back to dashboard
         </button>
@@ -293,7 +284,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
 
       <AlertDialog
         isOpen={!!alertMsg}
-        title="We spotted a hiccup"
+        title="Action required"
         message={alertMsg || ""}
         onClose={() => setAlertMsg(null)}
       />

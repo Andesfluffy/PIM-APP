@@ -7,6 +7,7 @@
   --glass-bg: rgba(255, 255, 255, 0.78);
   --glass-border: rgba(18, 74, 48, 0.16);
   --glass-shadow: 0 32px 70px -38px rgba(12, 74, 48, 0.45);
+  --font-display: var(--font-playfair);
 }
 
 @theme inline {
@@ -14,6 +15,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-plus-jakarta);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-playfair);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -33,6 +35,19 @@ body {
   font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, -apple-system,
     BlinkMacSystemFont, "Segoe UI", sans-serif;
   min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display), "Playfair Display", "Times New Roman", serif;
+  letter-spacing: -0.01em;
+}
+
+.type-subtle {
+  font-family: var(--font-plus-jakarta), "Plus Jakarta Sans", system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
 .glass {
