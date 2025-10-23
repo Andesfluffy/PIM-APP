@@ -1,69 +1,78 @@
-// import mongoose from "mongoose";
+import { createClient, sql as pooledSql } from "@vercel/postgres";
 
-// const MONGODB_URI = process.env.MONGODB_URI as string;
+let sql = pooledSql;
+let initialized = false;
+let connectionPromise: Promise<void> | null = null;
 
-// if (!MONGODB_URI) throw new Error("Missing MONGODB_URI in environment.");
-
-// let cached = (global as any).mongoose || { conn: null, promise: null };
-
-// export async function connectToDatabase() {
-//   if (cached.conn) return cached.conn;
-
-//   if (!cached.promise) {
-//     cached.promise = mongoose
-//       .connect(MONGODB_URI, {
-//         dbName: "pim-app",
-//         bufferCommands: false,
-//       })
-//       .then((mongoose) => mongoose);
-//   }
-
-//   cached.conn = await cached.promise;
-//   return cached.conn;
-// }
-
-import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-declare global {
-  var mongoose:
-    | {
-        conn: typeof mongoose | null;
-        promise: Promise<typeof mongoose> | null;
-      }
-    | undefined;
-}
-
-const globalWithMongoose = global as typeof globalThis & {
-  mongoose?: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  };
-};
-
-if (!globalWithMongoose.mongoose) {
-  globalWithMongoose.mongoose = {
-    conn: null,
-    promise: null,
-  };
-}
-
-const cached = globalWithMongoose.mongoose;
-
-export async function connectToDatabase() {
-  if (!MONGODB_URI) {
-    throw new Error("Missing MONGODB_URI in environment.");
-  }
-  if (cached.conn) return cached.conn;
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName: "pim-db",
-      bufferCommands: false,
-    });
+async function ensureClientConnection() {
+  if (process.env.POSTGRES_URL) {
+    return;
   }
 
-  cached.conn = await cached.promise;
-  return cached.conn;
+  const connectionString = process.env.POSTGRES_URL_NON_POOLING;
+  if (!connectionString) {
+    return;
+  }
+
+  if (!connectionPromise) {
+    const client = createClient({ connectionString });
+    sql = client.sql;
+    connectionPromise = client.connect();
+  }
+
+  await connectionPromise;
 }
+
+async function createTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS notes (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS contacts (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL,
+      priority TEXT NOT NULL,
+      due_date TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
+}
+
+export async function ensureDatabase() {
+  // Ensure a Postgres connection string is configured
+  if (!process.env.POSTGRES_URL && !process.env.POSTGRES_URL_NON_POOLING) {
+    throw new Error(
+      "Missing Postgres connection string. Set POSTGRES_URL (or POSTGRES_URL_NON_POOLING) in .env.local."
+    );
+  }
+  if (initialized) return;
+  await ensureClientConnection();
+  await createTables();
+  initialized = true;
+}
+
+export { sql };

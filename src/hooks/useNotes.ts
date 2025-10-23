@@ -84,16 +84,23 @@ export function useNotes(userId: string | undefined) {
   useEffect(() => {
     if (userId) {
       fetch(`/api/notes?userId=${userId}`)
-        .then((res) => res.json())
-        .then((data) =>
+        .then((res) => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
           setNotes(
-            data.map((n: any) => ({
+            list.map((n: any) => ({
               id: n._id,
               ...n,
             }))
-          )
-        )
-        .catch(console.error);
+          );
+        })
+        .catch((err) => {
+          console.error("GET /api/notes failed", err);
+          setNotes([]);
+        });
     }
   }, [userId]);
 

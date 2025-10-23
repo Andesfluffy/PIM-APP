@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Task from "@/lib/models/Task";
+import { createTask, listTasks } from "@/lib/repositories/tasks";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
-    const query = userId ? { userId } : {};
-    const tasks = await Task.find(query);
+    const tasks = await listTasks(userId ?? undefined);
     return NextResponse.json(tasks);
   } catch (err: any) {
     console.error("GET /api/tasks error", err);
@@ -40,23 +37,20 @@ export async function GET(req: NextRequest) {
 // }
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { userId, title, description, status, priority, dueDate } =
       await req.json();
     if (!userId || !title)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    const task = await Task.create({
+    const task = await createTask({
       userId,
       title,
       description,
-      status: status || "pending",
-      priority: priority || "medium",
+      status,
+      priority,
       dueDate,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
-    return NextResponse.json(task);
+    return NextResponse.json(task, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/tasks error", err);
     return NextResponse.json(

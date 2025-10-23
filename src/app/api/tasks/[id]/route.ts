@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Task from "@/lib/models/Task";
+import {
+  deleteTask,
+  findTask,
+  updateTask as updateTaskRecord,
+} from "@/lib/repositories/tasks";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
-    const task = await Task.findById(params.id);
+    const task = await findTask(params.id);
     if (!task) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -27,21 +29,17 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
     const body = await req.json();
-    const updated = await Task.findByIdAndUpdate(
-      params.id,
-      {
-        title: body.title,
-        description: body.description,
-        status: body.status,
-        priority: body.priority,
-        dueDate: body.dueDate,
-        updatedAt: new Date(),
-      },
-      { new: true, runValidators: true }
-    );
-
+    const updated = await updateTaskRecord(params.id, {
+      title: body.title,
+      description: body.description,
+      status: body.status,
+      priority: body.priority,
+      dueDate: body.dueDate,
+    });
+    if (!updated) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json(updated);
   } catch (err: any) {
     console.error("PUT /api/tasks/[id] error", err);
@@ -57,8 +55,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
-    await Task.findByIdAndDelete(params.id);
+    await deleteTask(params.id);
     return new Response(null, { status: 204 });
   } catch (err: any) {
     console.error("DELETE /api/tasks/[id] error", err);

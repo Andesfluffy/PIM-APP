@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Note from "@/lib/models/Note";
+import {
+  deleteNote,
+  findNote,
+  updateNote as updateNoteRecord,
+} from "@/lib/repositories/notes";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
-    const note = await Note.findById(params.id);
+    const note = await findNote(params.id);
     if (!note) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
@@ -28,13 +30,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
     const { title, content } = await req.json();
-    const updated = await Note.findByIdAndUpdate(
-      params.id,
-      { title, content, updatedAt: new Date() },
-      { new: true, runValidators: true }
-    );
+    const updated = await updateNoteRecord(params.id, { title, content });
+    if (!updated) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
     return NextResponse.json(updated);
   } catch (err: any) {
     console.error("PUT /api/notes/[id] error", err);
@@ -50,8 +50,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    await connectToDatabase();
-    await Note.findByIdAndDelete(params.id);
+    await deleteNote(params.id);
     return new Response(null, { status: 204 });
   } catch (err: any) {
     console.error("DELETE /api/notes/[id] error", err);

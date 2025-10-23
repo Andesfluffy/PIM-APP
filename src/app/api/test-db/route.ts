@@ -1,12 +1,13 @@
-import { connectToDatabase } from "@/lib/db";
+import { ensureDatabase, sql } from "@/lib/db";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    await connectToDatabase();
+    await ensureDatabase();
+    await sql`SELECT 1;`;
     return NextResponse.json({
       success: true,
-      message: "✅ Connected to Cosmos DB",
+      message: "✅ Connected to Vercel Postgres",
     });
   } catch (error: any) {
     console.error("❌ DB connection error:", error);
