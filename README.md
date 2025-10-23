@@ -80,24 +80,20 @@ Check out the Next.js deployment documentation for more details.
 
 ## PIM-APP
 
-This project provides a simple personal information manager built with Next.js and Azure Functions.
+This project provides a simple personal information manager built with Next.js and Vercel Postgres. The API routes under `src/app/api/` connect directly to the hosted database, so you no longer need a separate Azure Functions deployment.
 
-### Azure Deployment
+### Database Setup
 
-1. **Cosmos DB** – Create a Cosmos DB account using the *MongoDB API* and enable the **Free Tier** (1000 RU/s and 25&nbsp;GB). Note the connection string and database name.
-2. **Azure Functions** – Deploy the functions in `azure-functions/` to a Function App. Each function exposes an endpoint like `https://<APP_NAME>.azurewebsites.net/api/<FUNCTION_NAME>`.
-3. **Frontend** – Deploy the Next.js app to a separate App Service or Azure Static Web App.
-4. **Configuration** – Set environment variables (`MONGODB_URI`, `DATABASE_NAME`, etc.) in App Service settings or store them in Azure Key Vault.
+1. **Create a database** – In the Vercel dashboard, provision a Postgres database for your project.
+2. **Copy environment variables** – Add the `POSTGRES_URL` (and optionally `POSTGRES_URL_NON_POOLING`) variables to your Vercel project and to a local `.env.local` file when developing locally.
+3. **Run the migrations** – The API layer lazily creates the required tables on first use, so no manual migrations are required. Hitting `/api/test-db` is enough to provision the schema.
 
-With both services deployed, the frontend can call the serverless API to manage notes, contacts and tasks stored in Cosmos DB.
+### Local environment
 
-### Environment Setup
-
-Copy `.env.example` to `.env.local` and provide the required values:
+Create a `.env.local` file with the Postgres connection string supplied by Vercel:
 
 ```bash
-cp .env.example .env.local
+POSTGRES_URL="postgres://..."
 ```
 
-At a minimum, set `MONGODB_URI` to your Cosmos DB connection string. Without this the API routes (e.g. `/api/contacts` and `/api/tasks`) will return a 500 error.
-The application uses a database named `pim-db`. You can override this by setting the `DATABASE_NAME` environment variable.
+With the variable in place you can run `npm run dev` and access the application at [http://localhost:3000](http://localhost:3000). The `/api/test-db` endpoint returns a JSON payload confirming the connection to Vercel Postgres.

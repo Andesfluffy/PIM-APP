@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Note from "@/lib/models/Note";
+import { createNote, listNotes } from "@/lib/repositories/notes";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
-    const query = userId ? { userId } : {};
-    const notes = await Note.find(query);
+    const notes = await listNotes(userId ?? undefined);
     return NextResponse.json(notes);
   } catch (err: any) {
     console.error("GET /api/notes error", err);
@@ -41,19 +38,16 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { userId, title, content } = await req.json();
     if (!userId || !title || !content)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    const note = await Note.create({
+    const note = await createNote({
       userId,
       title,
       content,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
-    return NextResponse.json(note);
+    return NextResponse.json(note, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/notes error", err);
     return NextResponse.json(

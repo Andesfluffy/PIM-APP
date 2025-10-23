@@ -1,69 +1,50 @@
-// import mongoose from "mongoose";
+import { sql } from "@vercel/postgres";
 
-// const MONGODB_URI = process.env.MONGODB_URI as string;
+let initialized = false;
 
-// if (!MONGODB_URI) throw new Error("Missing MONGODB_URI in environment.");
+async function createTables() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS notes (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
 
-// let cached = (global as any).mongoose || { conn: null, promise: null };
+  await sql`
+    CREATE TABLE IF NOT EXISTS contacts (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      phone TEXT,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
 
-// export async function connectToDatabase() {
-//   if (cached.conn) return cached.conn;
-
-//   if (!cached.promise) {
-//     cached.promise = mongoose
-//       .connect(MONGODB_URI, {
-//         dbName: "pim-app",
-//         bufferCommands: false,
-//       })
-//       .then((mongoose) => mongoose);
-//   }
-
-//   cached.conn = await cached.promise;
-//   return cached.conn;
-// }
-
-import mongoose from "mongoose";
-
-const MONGODB_URI = process.env.MONGODB_URI;
-
-declare global {
-  var mongoose:
-    | {
-        conn: typeof mongoose | null;
-        promise: Promise<typeof mongoose> | null;
-      }
-    | undefined;
+  await sql`
+    CREATE TABLE IF NOT EXISTS tasks (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL,
+      title TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL,
+      priority TEXT NOT NULL,
+      due_date TIMESTAMPTZ,
+      created_at TIMESTAMPTZ NOT NULL,
+      updated_at TIMESTAMPTZ NOT NULL
+    );
+  `;
 }
 
-const globalWithMongoose = global as typeof globalThis & {
-  mongoose?: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  };
-};
-
-if (!globalWithMongoose.mongoose) {
-  globalWithMongoose.mongoose = {
-    conn: null,
-    promise: null,
-  };
+export async function ensureDatabase() {
+  if (initialized) return;
+  await createTables();
+  initialized = true;
 }
 
-const cached = globalWithMongoose.mongoose;
-
-export async function connectToDatabase() {
-  if (!MONGODB_URI) {
-    throw new Error("Missing MONGODB_URI in environment.");
-  }
-  if (cached.conn) return cached.conn;
-
-  if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI, {
-      dbName: "pim-db",
-      bufferCommands: false,
-    });
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
+export { sql };

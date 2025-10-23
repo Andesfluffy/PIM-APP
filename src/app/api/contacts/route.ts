@@ -1,14 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { connectToDatabase } from "@/lib/db";
-import Contact from "@/lib/models/Contact";
+import { createContact, listContacts } from "@/lib/repositories/contacts";
 
 export async function GET(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { searchParams } = new URL(req.url);
     const userId = searchParams.get("userId");
-    const query = userId ? { userId } : {};
-    const contacts = await Contact.find(query);
+    const contacts = await listContacts(userId ?? undefined);
     return NextResponse.json(contacts);
   } catch (err: any) {
     console.error("GET /api/contacts error", err);
@@ -40,20 +37,17 @@ export async function GET(req: NextRequest) {
 // }
 export async function POST(req: NextRequest) {
   try {
-    await connectToDatabase();
     const { userId, name, email, phone } = await req.json();
     if (!userId || !name || !email)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    const contact = await Contact.create({
+    const contact = await createContact({
       userId,
       name,
       email,
       phone,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
-    return NextResponse.json(contact);
+    return NextResponse.json(contact, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/contacts error", err);
     return NextResponse.json(
