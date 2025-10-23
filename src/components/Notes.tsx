@@ -11,6 +11,11 @@ type NotesProps = {
   onBackToDashboard: () => void;
 };
 
+type NoteErrors = {
+  title?: string;
+  content?: string;
+};
+
 const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const { notes, createNote, updateNote, deleteNote } = useNotes(userId);
   const [isCreating, setIsCreating] = useState(false);
@@ -19,31 +24,57 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
+  const [formErrors, setFormErrors] = useState<NoteErrors>({});
+
+  const resetForm = () => {
+    setNewNote({ title: "", content: "" });
+    setEditingNote(null);
+    setIsCreating(false);
+    setFormErrors({});
+  };
+
+  const validateForm = () => {
+    const errors: NoteErrors = {};
+    if (!newNote.title.trim()) {
+      errors.title = "A darling title is required.";
+    }
+    if (!newNote.content.trim()) {
+      errors.content = "Don&apos;t forget to add your note content.";
+    }
+    setFormErrors(errors);
+    return errors;
+  };
 
   const handleCreate = () => {
-    if (newNote.title.trim() && newNote.content.trim()) {
-      createNote(newNote.title, newNote.content);
-      setNewNote({ title: "", content: "" });
-      setIsCreating(false);
-    } else {
-      setAlertMsg("Please fill in both the note title and content.");
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setAlertMsg("Please fix the highlighted note fields before saving.");
+      return;
     }
+
+    createNote(newNote.title.trim(), newNote.content.trim());
+    resetForm();
   };
 
   const handleUpdate = () => {
-    if (editingNote && newNote.title.trim() && newNote.content.trim()) {
-      updateNote(editingNote.id, {
-        title: newNote.title,
-        content: newNote.content,
-      });
-    } else {
-      setAlertMsg("Please fill in both the note title and content.");
+    if (!editingNote) return;
+    const errors = validateForm();
+    if (Object.keys(errors).length > 0) {
+      setAlertMsg("Please fix the highlighted note fields before updating.");
+      return;
     }
+
+    updateNote(editingNote.id, {
+      title: newNote.title.trim(),
+      content: newNote.content.trim(),
+    });
+    resetForm();
   };
 
   const startEdit = (note: Note) => {
     setEditingNote(note);
     setNewNote({ title: note.title, content: note.content });
+    setFormErrors({});
     setIsCreating(true);
   };
 
@@ -54,65 +85,111 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   );
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-white flex items-center gap-3">
-          <span className="text-4xl">📝</span>
-          Notes
-        </h2>
+    <div className="glass-card rounded-3xl border border-rose-200/60 p-6 shadow-lg shadow-rose-100">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="flex items-center gap-3 text-3xl font-bold text-rose-600">
+            <span className="text-4xl">📝</span>
+            Notes
+          </h2>
+          <p className="text-sm text-rose-500">Capture your thoughts in gorgeous detail.</p>
+        </div>
         <button
-          onClick={() => setIsCreating(true)}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-105"
+          onClick={() => {
+            setIsCreating(true);
+            setFormErrors({});
+          }}
+          className="rounded-2xl bg-gradient-to-r from-rose-400 via-pink-300 to-amber-300 px-5 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
         >
           + New Note
         </button>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-5">
+        <label className="sr-only" htmlFor="note-search">
+          Search notes
+        </label>
         <input
+          id="note-search"
           type="text"
           placeholder="Search notes..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          className="w-full rounded-2xl border border-rose-200/70 bg-white/80 px-4 py-3 text-rose-700 placeholder:text-rose-300 shadow-inner focus:border-rose-300 focus:outline-none focus:ring-2 focus:ring-rose-200"
         />
       </div>
 
       {isCreating && (
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/10 p-4 rounded-xl border border-white/20 mb-4"
+          className="mb-6 rounded-2xl border border-rose-200/70 bg-white/85 p-5 shadow-md"
         >
-          <input
-            type="text"
-            placeholder="Note title..."
-            value={newNote.title}
-            onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
-            className="w-full bg-transparent border-none text-white text-lg font-semibold placeholder-white/50 focus:outline-none mb-2"
-          />
-          <textarea
-            placeholder="Write your note..."
-            value={newNote.content}
-            onChange={(e) =>
-              setNewNote({ ...newNote, content: e.target.value })
-            }
-            className="w-full bg-transparent border-none text-white placeholder-white/50 focus:outline-none resize-none h-32 mb-3"
-          />
-          <div className="flex gap-2">
+          <div className="space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="note-title">
+                Title
+              </label>
+              <input
+                id="note-title"
+                type="text"
+                placeholder="Note title..."
+                value={newNote.title}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewNote((prev) => ({ ...prev, title: value }));
+                  if (formErrors.title && value.trim()) {
+                    setFormErrors((prev) => ({ ...prev, title: undefined }));
+                  }
+                }}
+                className={`w-full rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                  formErrors.title
+                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
+                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                }`}
+              />
+              {formErrors.title && (
+                <p className="mt-1 text-sm text-rose-500">{formErrors.title}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-rose-500" htmlFor="note-content">
+                Content
+              </label>
+              <textarea
+                id="note-content"
+                placeholder="Write your note..."
+                value={newNote.content}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setNewNote((prev) => ({ ...prev, content: value }));
+                  if (formErrors.content && value.trim()) {
+                    setFormErrors((prev) => ({ ...prev, content: undefined }));
+                  }
+                }}
+                className={`h-32 w-full resize-none rounded-xl border px-4 py-3 text-rose-700 placeholder:text-rose-300 focus:outline-none focus:ring-2 ${
+                  formErrors.content
+                    ? "border-rose-400 bg-rose-50 focus:ring-rose-300"
+                    : "border-rose-200 bg-white/70 focus:border-rose-300 focus:ring-rose-200"
+                }`}
+              />
+              {formErrors.content && (
+                <p className="mt-1 text-sm text-rose-500">{formErrors.content}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mt-5 flex flex-wrap gap-3">
             <button
               onClick={editingNote ? handleUpdate : handleCreate}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded-lg text-sm font-medium"
+              className="rounded-xl bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 px-4 py-2 text-sm font-semibold text-rose-900 shadow-md shadow-rose-200 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-4 focus:ring-rose-200"
             >
               {editingNote ? "Update" : "Create"}
             </button>
             <button
-              onClick={() => {
-                setIsCreating(false);
-                setEditingNote(null);
-                setNewNote({ title: "", content: "" });
-              }}
-              className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-1 rounded-lg text-sm font-medium"
+              onClick={resetForm}
+              className="rounded-xl border border-rose-200 bg-white px-4 py-2 text-sm font-semibold text-rose-400 transition-colors hover:border-rose-300 hover:text-rose-500"
             >
               Cancel
             </button>
@@ -120,47 +197,45 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         </motion.div>
       )}
 
-      <div className="space-y-3 max-h-96 overflow-y-auto">
+      <div className="max-h-96 space-y-3 overflow-y-auto pr-1">
         {filteredNotes.map((note) => (
           <motion.div
             key={note.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="bg-white/10 p-4 rounded-xl border border-white/20 hover:border-white/30 transition-colors group"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-rose-200/70 bg-white/80 p-4 shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-rose-300 hover:shadow-md"
           >
-            <div className="flex justify-between items-start mb-2">
-              <h3 className="text-white font-semibold text-lg">{note.title}</h3>
-              <div className="flex gap-2">
+            <div className="mb-2 flex items-start justify-between gap-4">
+              <h3 className="text-lg font-semibold text-rose-600">{note.title}</h3>
+              <div className="flex gap-2 text-lg">
                 <button
                   onClick={() => startEdit(note)}
-                  className="text-blue-400 hover:text-blue-300 text-sm"
+                  className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
+                  aria-label="Edit note"
                 >
                   ✏️
                 </button>
                 <button
                   onClick={() => setNoteToDelete(note)}
-                  className="text-red-400 hover:text-red-300 text-sm"
+                  className="rounded-full bg-rose-100 px-2 py-1 text-rose-500 transition-colors hover:bg-rose-200"
+                  aria-label="Delete note"
                 >
                   🗑️
                 </button>
               </div>
             </div>
-            <p className="text-white/80 text-sm mb-3 whitespace-pre-wrap">
+            <p className="mb-4 whitespace-pre-wrap text-sm leading-relaxed text-rose-500">
               {note.content}
             </p>
-            <div className="flex justify-between items-center text-xs text-white/50">
-              <span>
-                Created: {new Date(note.createdAt).toLocaleDateString()}
-              </span>
-              <span>
-                Updated: {new Date(note.updatedAt).toLocaleDateString()}
-              </span>
+            <div className="flex flex-wrap items-center justify-between text-xs text-rose-300">
+              <span>Created: {new Date(note.createdAt).toLocaleDateString()}</span>
+              <span>Updated: {new Date(note.updatedAt).toLocaleDateString()}</span>
             </div>
           </motion.div>
         ))}
 
         {filteredNotes.length === 0 && (
-          <div className="text-center text-white/50 py-8">
+          <div className="py-10 text-center text-rose-400">
             {searchTerm
               ? "No notes found matching your search."
               : "No notes yet. Create your first note!"}
@@ -168,15 +243,15 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         )}
       </div>
 
-      {/* Back button now uses the passed prop */}
       <div className="mt-6">
         <button
           onClick={onBackToDashboard}
-          className="text-purple-400 hover:text-purple-200 text-sm underline"
+          className="text-sm font-semibold text-rose-500 transition-colors hover:text-rose-600"
         >
-          ← Back to Dashboard
+          ← Back to dashboard
         </button>
       </div>
+
       <ConfirmDialog
         isOpen={!!noteToDelete}
         title="Delete Note"
@@ -193,7 +268,7 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
 
       <AlertDialog
         isOpen={!!alertMsg}
-        title="Attention"
+        title="We spotted a hiccup"
         message={alertMsg || ""}
         onClose={() => setAlertMsg(null)}
       />
