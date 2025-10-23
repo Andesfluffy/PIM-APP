@@ -1,6 +1,27 @@
-import { sql } from "@vercel/postgres";
+import { createClient, sql as pooledSql } from "@vercel/postgres";
 
+let sql = pooledSql;
 let initialized = false;
+let connectionPromise: Promise<void> | null = null;
+
+async function ensureClientConnection() {
+  if (process.env.POSTGRES_URL) {
+    return;
+  }
+
+  const connectionString = process.env.POSTGRES_URL_NON_POOLING;
+  if (!connectionString) {
+    return;
+  }
+
+  if (!connectionPromise) {
+    const client = createClient({ connectionString });
+    sql = client.sql;
+    connectionPromise = client.connect();
+  }
+
+  await connectionPromise;
+}
 
 async function createTables() {
   await sql`
@@ -49,6 +70,7 @@ export async function ensureDatabase() {
     );
   }
   if (initialized) return;
+  await ensureClientConnection();
   await createTables();
   initialized = true;
 }
