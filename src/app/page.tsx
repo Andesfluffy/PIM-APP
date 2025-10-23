@@ -96,99 +96,108 @@ export default function HomePage() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.35, ease: "easeOut" }}
-            className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8 sm:px-8"
+            className="relative z-10 flex min-h-screen items-center justify-center px-4 py-12 sm:px-6"
           >
-            <div className="relative flex h-[min(720px,92vh)] w-full max-w-6xl flex-col justify-center gap-10 rounded-[40px] border border-emerald-200/60 bg-white/80 px-8 py-10 shadow-[0_60px_120px_-70px_rgba(12,74,48,0.55)] backdrop-blur-xl lg:flex-row lg:items-center lg:px-14">
-              <div className="flex w-full flex-col gap-10 lg:w-[52%]">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-3 rounded-full bg-emerald-100/80 px-4 py-2 text-sm font-semibold text-emerald-700">
-                    <span className="text-xl">🌿</span>
-                    Verdant workspace
+            <div className="relative w-full max-w-6xl space-y-12 rounded-[40px] border border-emerald-200/60 bg-white/85 px-6 py-12 shadow-[0_60px_120px_-70px_rgba(12,74,48,0.55)] backdrop-blur-xl sm:px-10 lg:px-16">
+              <div className="grid grid-cols-1 gap-12 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:items-center">
+                <div className="flex flex-col gap-10">
+                  <div className="space-y-7">
+                    <div className="inline-flex items-center gap-3 rounded-full bg-emerald-50/90 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.32em] text-emerald-700 sm:text-xs">
+                      <span className="text-lg sm:text-xl">🌿</span>
+                      Verdant workspace
+                    </div>
+                    <div className="space-y-4">
+                      <h1 className="text-4xl font-semibold leading-[1.1] text-[#0f2d22] sm:text-5xl lg:text-[3.4rem]">
+                        Command your flow with composed clarity.
+                      </h1>
+                      <p className="type-subtle text-base leading-relaxed text-emerald-600/85">
+                        Keep notes, commitments, and relationships in one serene place. Your desk stays poised while every layer quietly updates in the background.
+                      </p>
+                    </div>
                   </div>
-                  <div className="space-y-4">
-                    <h1 className="text-4xl leading-tight text-[#0f2d22] sm:text-5xl lg:text-6xl">
-                      A calmer command centre for your day.
-                    </h1>
-                    <p className="type-subtle text-base leading-relaxed text-emerald-600/80">
-                      Seamlessly orchestrate notes, priorities, and relationships in an interface that feels curated and contemporary. Sign in once and every surface syncs in real time.
+
+                  <div className="space-y-6">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <LoginButton
+                        variant="solid"
+                        fullWidth
+                        className="sm:max-w-xs"
+                      >
+                        <span className="text-base font-semibold">Sign in with Google</span>
+                      </LoginButton>
+                      <button
+                        type="button"
+                        onClick={() => setView("notes")}
+                        className="type-subtle inline-flex items-center justify-center rounded-2xl border border-emerald-200/80 px-4 py-3 text-sm font-semibold text-emerald-600 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-700"
+                      >
+                        Tour the live suite
+                      </button>
+                    </div>
+                    <p className="type-subtle text-xs text-emerald-500/75">
+                      Google sign-in unlocks the full workspace today. Private email onboarding is arriving shortly.
+                    </p>
+                    <div className="grid grid-cols-1 gap-4 text-sm text-emerald-600/85 sm:grid-cols-3">
+                      {quickMetrics.map((metric) => (
+                        <div
+                          key={metric.label}
+                          className="rounded-2xl border border-emerald-100/80 bg-emerald-50/60 p-4 text-left shadow-[0_24px_48px_-40px_rgba(12,74,48,0.6)]"
+                        >
+                          <p className="text-[11px] uppercase tracking-[0.28em] text-emerald-400">{metric.label}</p>
+                          <p className="mt-2 text-lg font-semibold text-emerald-700">{metric.value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-6">
+                  <div className="rounded-[32px] border border-emerald-100/70 bg-[#102a1f] shadow-[0_45px_90px_-65px_rgba(12,74,48,0.55)]">
+                    <div className="relative aspect-[5/4] w-full overflow-hidden rounded-[30px] border border-white/5">
+                      <Image
+                        src={heroImage}
+                        alt="Verdant workspace preview"
+                        fill
+                        priority
+                        sizes="(min-width: 1024px) 520px, 90vw"
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a1f18]/80 via-[#0c2a1d]/35 to-transparent" />
+                    </div>
+                  </div>
+                  <div className="rounded-[28px] border border-emerald-100/70 bg-white/95 p-6 text-[#123327] shadow-[0_32px_64px_-48px_rgba(12,74,48,0.7)] backdrop-blur">
+                    <p className="text-[11px] uppercase tracking-[0.42em] text-emerald-400">Preview suite</p>
+                    <p className="mt-3 text-base font-semibold text-emerald-800">
+                      Flow through notes, tasks, and contacts without trading precision for calm.
                     </p>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                    <LoginButton
-                      variant="solid"
-                      fullWidth
-                      className="sm:max-w-xs"
-                    >
-                      <span className="text-base font-semibold">Sign in with Google</span>
-                    </LoginButton>
-                    <button
-                      type="button"
-                      onClick={() => setView("notes")}
-                      className="type-subtle inline-flex items-center justify-center rounded-2xl border border-emerald-200/70 px-4 py-3 text-sm font-semibold text-emerald-600 transition-all duration-200 hover:border-emerald-400 hover:text-emerald-700"
-                    >
-                      Explore the live preview
-                    </button>
-                  </div>
-                  <p className="type-subtle text-xs text-emerald-500/70">
-                    Google sign-in unlocks the full workspace today. Personal email onboarding is on the way.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-3 gap-4 text-sm text-emerald-600/80">
-                  {quickMetrics.map((metric) => (
-                    <div
-                      key={metric.label}
-                      className="rounded-2xl border border-emerald-100/60 bg-emerald-50/50 p-4 text-center"
-                    >
-                      <p className="text-xs uppercase tracking-[0.2em] text-emerald-400">{metric.label}</p>
-                      <p className="mt-2 text-lg font-semibold text-emerald-700">{metric.value}</p>
-                    </div>
-                  ))}
                 </div>
               </div>
 
-              <div className="grid w-full flex-1 gap-4">
-                <div className="relative h-52 overflow-hidden rounded-[28px] border border-emerald-100/70">
-                  <Image
-                    src={heroImage}
-                    alt="Verdant workspace preview"
-                    fill
-                    priority
-                    sizes="(min-width: 1024px) 360px, 100vw"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-black/10 to-transparent" />
-                  <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/80 p-4 text-[#123327] shadow-[0_25px_45px_-35px_rgba(12,74,48,0.65)] backdrop-blur">
-                    <p className="text-xs uppercase tracking-[0.35em] text-emerald-400">Preview</p>
-                    <p className="mt-2 text-sm font-semibold text-emerald-800">
-                      Flow through notes, tasks, and contacts without losing your sense of calm.
-                    </p>
-                  </div>
+              <div className="rounded-[32px] border border-emerald-100/80 bg-gradient-to-br from-emerald-50/80 via-white/85 to-lime-50/70 p-6 shadow-[0_35px_70px_-50px_rgba(12,74,48,0.55)] sm:p-8">
+                <div className="mb-6 flex flex-wrap items-center justify-between gap-4 text-[11px] uppercase tracking-[0.3em] text-emerald-500/85">
+                  <span className="rounded-full bg-white/60 px-4 py-1 font-semibold text-emerald-700">Suite highlights</span>
+                  <span className="type-subtle tracking-[0.26em] text-emerald-400/90">Consistency across every surface</span>
                 </div>
-
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                   {featureTiles.map((feature) => (
                     <div
                       key={feature.key}
-                      className="group relative overflow-hidden rounded-3xl border border-emerald-100/70 bg-white/75 p-6 shadow-[0_32px_60px_-45px_rgba(12,74,48,0.55)] backdrop-blur-md"
+                      className="group relative flex min-h-[200px] flex-col justify-between gap-4 rounded-2xl border border-emerald-100/70 bg-white/80 p-5 shadow-[0_28px_56px_-48px_rgba(12,74,48,0.6)] transition-transform duration-300 hover:-translate-y-1.5"
                     >
                       <div
-                        className={`absolute inset-0 bg-gradient-to-br ${feature.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
+                        className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${feature.accent} opacity-0 transition-opacity duration-300 group-hover:opacity-100`}
                       />
-                      <div className="relative z-10 space-y-4">
-                        <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-white/60 text-2xl shadow-sm shadow-emerald-100">
+                      <div className="relative z-10 flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/85 text-xl shadow-sm shadow-emerald-100">
                           {feature.icon}
-                        </span>
-                        <h3 className="text-xl font-semibold text-emerald-800 capitalize">
+                        </div>
+                        <h3 className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-700">
                           {feature.title}
                         </h3>
-                        <p className="type-subtle text-sm leading-relaxed text-emerald-600/80">
-                          {feature.description}
-                        </p>
                       </div>
+                      <p className="relative z-10 type-subtle text-sm leading-relaxed text-emerald-600/85">
+                        {feature.description}
+                      </p>
                     </div>
                   ))}
                 </div>

@@ -10,6 +10,23 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-export const auth = getAuth(app);
-export const googleProvider = app ? new GoogleAuthProvider() : undefined;
+const hasValidConfig = Object.values(firebaseConfig).every(
+  (value) => typeof value === "string" && value.trim().length > 0,
+);
+
+if (!hasValidConfig && process.env.NODE_ENV === "development") {
+  console.warn(
+    "Firebase configuration is incomplete. Populate the NEXT_PUBLIC_FIREBASE_* environment variables to enable authentication.",
+  );
+}
+
+const app =
+  hasValidConfig && !getApps().length
+    ? initializeApp(firebaseConfig)
+    : hasValidConfig
+      ? getApp()
+      : undefined;
+
+export const auth = app ? getAuth(app) : null;
+export const googleProvider = app ? new GoogleAuthProvider() : null;
+export const isFirebaseConfigured = Boolean(app);

@@ -32,6 +32,13 @@ export default function LoginButton({
   className = "",
 }: LoginButtonProps) {
   const signInWithGoogle = async () => {
+    if (!auth || !googleProvider) {
+      console.error(
+        "Firebase is not configured. Provide the NEXT_PUBLIC_FIREBASE_* environment variables to enable Google sign-in.",
+      );
+      return;
+    }
+
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
@@ -40,7 +47,7 @@ export default function LoginButton({
   };
 
   const baseClasses =
-    "group relative flex items-center justify-center gap-3 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+    "group relative flex items-center justify-center gap-3 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:opacity-60";
   const variantClasses =
     variant === "solid"
       ? "bg-emerald-600 text-white shadow-[0_18px_35px_rgba(16,94,67,0.18)] hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(16,94,67,0.25)] focus-visible:outline-emerald-600"
@@ -52,6 +59,8 @@ export default function LoginButton({
       type="button"
       onClick={signInWithGoogle}
       className={`${baseClasses} ${variantClasses} ${widthClass} ${className}`.trim()}
+      disabled={!auth || !googleProvider}
+      aria-disabled={!auth || !googleProvider}
     >
       <span className="flex items-center gap-3">
         <span className="flex h-5 w-5 items-center justify-center">
