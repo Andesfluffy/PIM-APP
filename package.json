@@ -11,9 +11,10 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "firebase": "^12.0.0",
-    "framer-motion": "^12.23.7",
     "@vercel/postgres": "^0.10.0",
+    "firebase": "^12.0.0",
+    "firebase-admin": "^12.7.0",
+    "framer-motion": "^12.23.7",
     "next": "15.4.3",
     "react": "19.1.0",
     "react-dom": "19.1.0",
@@ -31,3 +32,4 @@
     "typescript": "^5"
   }
 }
+

@@ -56,14 +56,15 @@ export async function listTasks(userId?: string) {
   return result.rows.map(mapTask);
 }
 
-export async function findTask(id: string) {
+export async function findTask(id: string, userId?: string) {
   await ensureDatabase();
-  const result = await sql<TaskRow>`
-    SELECT *
-    FROM tasks
-    WHERE id = ${id}
-    LIMIT 1;
-  `;
+  const result = userId
+    ? await sql<TaskRow>`
+        SELECT * FROM tasks WHERE id = ${id} AND user_id = ${userId} LIMIT 1;
+      `
+    : await sql<TaskRow>`
+        SELECT * FROM tasks WHERE id = ${id} LIMIT 1;
+      `;
   const task = result.rows[0];
   return task ? mapTask(task) : null;
 }
@@ -115,46 +116,47 @@ export async function updateTask(
     status: string;
     priority: string;
     dueDate: string | null;
-  }>
+  }>,
+  userId?: string
 ) {
   await ensureDatabase();
   const now = new Date();
-  const fields = [sql`updated_at = ${now}`];
 
-  if (updates.title !== undefined) {
-    fields.push(sql`title = ${updates.title}`);
-  }
-
-  if (updates.description !== undefined) {
-    fields.push(sql`description = ${updates.description ?? null}`);
-  }
-
-  if (updates.status !== undefined) {
-    fields.push(sql`status = ${updates.status}`);
-  }
-
-  if (updates.priority !== undefined) {
-    fields.push(sql`priority = ${updates.priority}`);
-  }
-
-  if (updates.dueDate !== undefined) {
-    fields.push(sql`due_date = ${updates.dueDate ? new Date(updates.dueDate) : null}`);
-  }
-
-  const result = await sql<TaskRow>`
-    UPDATE tasks
-    SET ${sql.join(fields, sql`, `)}
-    WHERE id = ${id}
-    RETURNING *;
-  `;
+  // Use COALESCE to safely update only provided fields; scope by user if provided
+  const result = userId
+    ? await sql<TaskRow>`
+        UPDATE tasks
+        SET
+          title = COALESCE(${updates.title ?? null}, title),
+          description = COALESCE(${updates.description ?? null}, description),
+          status = COALESCE(${updates.status ?? null}, status),
+          priority = COALESCE(${updates.priority ?? null}, priority),
+          due_date = COALESCE(${updates.dueDate ? new Date(updates.dueDate) : null}, due_date),
+          updated_at = ${now}
+        WHERE id = ${id} AND user_id = ${userId}
+        RETURNING *;
+      `
+    : await sql<TaskRow>`
+        UPDATE tasks
+        SET
+          title = COALESCE(${updates.title ?? null}, title),
+          description = COALESCE(${updates.description ?? null}, description),
+          status = COALESCE(${updates.status ?? null}, status),
+          priority = COALESCE(${updates.priority ?? null}, priority),
+          due_date = COALESCE(${updates.dueDate ? new Date(updates.dueDate) : null}, due_date),
+          updated_at = ${now}
+        WHERE id = ${id}
+        RETURNING *;
+      `;
   const row = result.rows[0];
   return row ? mapTask(row) : null;
 }
 
-export async function deleteTask(id: string) {
+export async function deleteTask(id: string, userId?: string) {
   await ensureDatabase();
-  await sql`
-    DELETE FROM tasks
-    WHERE id = ${id};
-  `;
+  if (userId) {
+    await sql`DELETE FROM tasks WHERE id = ${id} AND user_id = ${userId};`;
+  } else {
+    await sql`DELETE FROM tasks WHERE id = ${id};`;
+  }
 }

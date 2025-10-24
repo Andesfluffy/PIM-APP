@@ -94,9 +94,12 @@ export function useContacts(userId: string | undefined) {
 
   useEffect(() => {
     if (userId) {
-      fetch(`/api/contacts?userId=${userId}`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      fetch(`/api/contacts`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
           return res.json();
         })
         .then((data) => {
@@ -109,44 +112,102 @@ export function useContacts(userId: string | undefined) {
           );
         })
         .catch((err) => {
+          if (String(err?.message || "").includes("401")) {
+            setContacts([]);
+            return;
+          }
           console.error("GET /api/contacts failed", err);
           setContacts([]);
         });
     }
   }, [userId]);
 
+  // Light revalidation on window focus
+  useEffect(() => {
+    if (!userId) return;
+    const onFocus = () => {
+      fetch(`/api/contacts`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
+          setContacts(
+            list.map((c: any) => ({
+              id: c._id,
+              ...c,
+            }))
+          );
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [userId]);
+
   const createContact = async (
     contact: Omit<Contact, "id" | "createdAt" | "updatedAt">
   ) => {
-    const res = await fetch("/api/contacts", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(contact),
-    });
-    if (!res.ok) {
-      console.error(`Failed to create contact: ${res.status}`);
-      return;
+    const nowIso = new Date().toISOString();
+    const tempId = `temp_${Date.now()}`;
+    const tempContact: Contact = {
+      id: tempId,
+      name: contact.name,
+      email: contact.email,
+      phone: contact.phone,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      userId: userId || "",
+    };
+
+    // Optimistically add to the top
+    setContacts((prev) => [tempContact, ...prev]);
+
+    try {
+      const res = await fetch("/api/contacts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contact),
+      });
+      if (!res.ok) throw new Error(`Failed to create contact: ${res.status}`);
+      const newContact = await res.json();
+      setContacts((prev) =>
+        prev.map((c) => (c.id === tempId ? { id: newContact._id, ...newContact } : c))
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic insert
+      setContacts((prev) => prev.filter((c) => c.id !== tempId));
     }
-    const newContact = await res.json();
-    setContacts((prev) => [
-      ...prev,
-      {
-        id: newContact._id,
-        ...newContact,
-      },
-    ]);
   };
 
   const updateContact = async (id: string, updates: Partial<Contact>) => {
-    const res = await fetch(`/api/contacts/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    const updated = await res.json();
+    // Optimistic update
+    const prevContacts = contacts.slice();
     setContacts((prev) =>
-      prev.map((c) => (c.id === id ? { id: updated._id, ...updated } : c))
+      prev.map((c) => (c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c))
     );
+
+    try {
+      const res = await fetch(`/api/contacts/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error(`Failed to update contact: ${res.status}`);
+      const updated = await res.json();
+      setContacts((prev) =>
+        prev.map((c) => (c.id === id ? { id: updated._id, ...updated } : c))
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert
+      setContacts(prevContacts);
+    }
   };
 
   const deleteContact = async (id: string) => {

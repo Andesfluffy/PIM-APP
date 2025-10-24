@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserSessionPersistence } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,3 +20,9 @@ const app =
 export const auth = app ? getAuth(app) : undefined;
 export const googleProvider = app ? new GoogleAuthProvider() : undefined;
 export const firebaseReady = Boolean(app);
+
+// Ensure auth uses per-tab session persistence and clears on tab close
+if (auth) {
+  // Best-effort; ignore if unavailable in environment
+  setPersistence(auth, browserSessionPersistence).catch(() => {});
+}

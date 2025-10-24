@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createContact, listContacts } from "@/lib/repositories/contacts";
+import { verifyAuth, unauthorized } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const contacts = await listContacts(userId ?? undefined);
+    const { uid } = await verifyAuth(req);
+    const contacts = await listContacts(uid);
     return NextResponse.json(contacts);
   } catch (err: any) {
     console.error("GET /api/contacts error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -37,12 +35,13 @@ export async function GET(req: NextRequest) {
 // }
 export async function POST(req: NextRequest) {
   try {
-    const { userId, name, email, phone } = await req.json();
-    if (!userId || !name || !email)
+    const { uid } = await verifyAuth(req);
+    const { name, email, phone } = await req.json();
+    if (!name || !email)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
     const contact = await createContact({
-      userId,
+      userId: uid,
       name,
       email,
       phone,
@@ -50,9 +49,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(contact, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/contacts error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

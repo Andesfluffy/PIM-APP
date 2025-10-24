@@ -60,6 +60,20 @@ async function createTables() {
       updated_at TIMESTAMPTZ NOT NULL
     );
   `;
+
+  // Helpful indexes for performance
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_notes_user_created ON notes (user_id, created_at DESC);
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_contacts_user_created ON contacts (user_id, created_at DESC);
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_tasks_user_created ON tasks (user_id, created_at DESC);
+  `;
+  await sql`
+    CREATE INDEX IF NOT EXISTS idx_tasks_user_status ON tasks (user_id, status);
+  `;
 }
 
 export async function ensureDatabase() {

@@ -25,7 +25,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       if (firebaseUser) {
         try {
           const token = await firebaseUser.getIdToken();
-          document.cookie = `firebase-auth-token=${token}; path=/; max-age=3600; secure; samesite=strict`;
+          // Set a session cookie; in dev over http, omit `secure` so the cookie is set on localhost
+          const isHttps = typeof window !== "undefined" && window.location.protocol === "https:";
+          const isProd = process.env.NODE_ENV === "production";
+          const secureAttr = isHttps || isProd ? "; secure" : "";
+          // Be strict in prod, a bit looser in dev to avoid cookie drops
+          const sameSiteAttr = isProd ? "; samesite=strict" : "; samesite=lax";
+          document.cookie = `firebase-auth-token=${token}; path=/${sameSiteAttr}${secureAttr}`;
 
           const userData = {
             id: firebaseUser.uid,
@@ -58,6 +64,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     });
 
     return unsubscribe;
+  }, []);
+
+  // End session on tab close: clear cookie and sign out
+  useEffect(() => {
+    if (!auth) return;
+    const handleUnload = () => {
+      try {
+        // Clear the auth cookie immediately
+        document.cookie =
+          "firebase-auth-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; samesite=strict";
+        // Best effort sign-out; may not complete before unload, but persistence is per-tab
+        signOut(auth).catch(() => {});
+      } catch {}
+    };
+    window.addEventListener("pagehide", handleUnload);
+    window.addEventListener("beforeunload", handleUnload);
+    return () => {
+      window.removeEventListener("pagehide", handleUnload);
+      window.removeEventListener("beforeunload", handleUnload);
+    };
   }, []);
 
   const logout = async () => {

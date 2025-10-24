@@ -1,7 +1,7 @@
 "use client";
 
 import { Contact, useContacts } from "@/hooks/useContacts";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
 import ConfirmDialog from "./ConfirmDialog";
@@ -28,12 +28,22 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
     phone: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [formErrors, setFormErrors] = useState<ContactErrors>({});
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const phoneRegex = /^\+?[0-9\-\s()]{0,20}$/;
+
+  // Persist view mode selection
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("contacts_view_mode") : null;
+    if (saved === "grid" || saved === "list") setViewMode(saved);
+  }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("contacts_view_mode", viewMode);
+  }, [viewMode]);
 
   const resetForm = () => {
     setNewContact({ name: "", email: "", phone: "" });
@@ -68,7 +78,6 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       name: newContact.name.trim(),
       email: newContact.email.trim(),
       phone: newContact.phone.trim() || undefined,
-      userId,
     });
     resetForm();
   };
@@ -85,7 +94,6 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
       name: newContact.name.trim(),
       email: newContact.email.trim(),
       phone: newContact.phone.trim() || undefined,
-      userId,
     });
     resetForm();
   };
@@ -101,12 +109,15 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
     setIsCreating(true);
   };
 
-  const filteredContacts = contacts.filter(
-    (contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (contact.phone && contact.phone.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredContacts = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return contacts.filter(
+      (contact) =>
+        contact.name.toLowerCase().includes(q) ||
+        contact.email.toLowerCase().includes(q) ||
+        (contact.phone && contact.phone.toLowerCase().includes(q))
+    );
+  }, [contacts, searchTerm]);
 
   return (
     <div className="rounded-[32px] border border-tea-green-700 bg-white/85 p-8 shadow-[0_40px_80px_-55px_rgba(1,25,54,0.4)] backdrop-blur-xl">
@@ -120,15 +131,35 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
             Maintain an elegant directory with smart filters and concise profile cards.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setIsCreating(true);
-            setFormErrors({});
-          }}
-          className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
-        >
-          Add contact
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex rounded-xl border border-tea-green-700 bg-white/85 p-1 text-xs">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "grid" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "list" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              List
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setIsCreating(true);
+              setFormErrors({});
+            }}
+            className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
+          >
+            Add contact
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -252,6 +283,7 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
         </motion.div>
       )}
 
+      {viewMode === "grid" && (
       <div className="grid max-h-[420px] grid-cols-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
         {filteredContacts.map((contact) => (
           <motion.div
@@ -302,6 +334,47 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           </div>
         )}
       </div>
+      )}
+
+      {viewMode === "list" && (
+        <div className="max-h-[420px] overflow-y-auto pr-1">
+          <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
+            {filteredContacts.map((contact) => (
+              <div key={contact.id} className="flex items-center gap-4 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{contact.name}</h3>
+                    <span className="shrink-0 text-xs text-charcoal-400">{new Date(contact.updatedAt || contact.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <div className="type-subtle mt-1 text-xs text-charcoal-500/90">
+                    <span>{contact.email}</span>
+                    {contact.phone && <span className="ml-2 text-oxford-blue-400">• {contact.phone}</span>}
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => startEdit(contact)}
+                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setContactToDelete(contact)}
+                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredContacts.length === 0 && (
+              <div className="flex h-36 items-center justify-center text-charcoal-400">
+                {searchTerm ? "No contacts match your search yet." : "Your address book is clear. Add your first contact."}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6">
         <button
@@ -337,3 +410,4 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
 };
 
 export default Contacts;
+

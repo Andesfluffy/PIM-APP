@@ -1,7 +1,7 @@
 "use client";
 
 import { Note, useNotes } from "@/hooks/useNotes";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
 import ConfirmDialog from "./ConfirmDialog";
@@ -22,9 +22,19 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [newNote, setNewNote] = useState({ title: "", content: "" });
   const [searchTerm, setSearchTerm] = useState("");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [noteToDelete, setNoteToDelete] = useState<Note | null>(null);
   const [formErrors, setFormErrors] = useState<NoteErrors>({});
+
+  // Persist view mode per suite
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("notes_view_mode") : null;
+    if (saved === "grid" || saved === "list") setViewMode(saved);
+  }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("notes_view_mode", viewMode);
+  }, [viewMode]);
 
   const resetForm = () => {
     setNewNote({ title: "", content: "" });
@@ -78,11 +88,14 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
     setIsCreating(true);
   };
 
-  const filteredNotes = notes.filter(
-    (note) =>
-      note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredNotes = useMemo(() => {
+    const q = searchTerm.toLowerCase();
+    return notes.filter(
+      (note) =>
+        note.title.toLowerCase().includes(q) ||
+        note.content.toLowerCase().includes(q)
+    );
+  }, [notes, searchTerm]);
 
   return (
     <div className="rounded-[32px] border border-tea-green-700 bg-white/85 p-8 shadow-[0_40px_80px_-55px_rgba(1,25,54,0.4)] backdrop-blur-xl">
@@ -96,15 +109,35 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
             Layer thoughts, outlines, and inspiration in a tranquil grid designed for focus.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setIsCreating(true);
-            setFormErrors({});
-          }}
-          className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
-        >
-          Add note
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex rounded-xl border border-tea-green-700 bg-white/85 p-1 text-xs">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "grid" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "list" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              List
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setIsCreating(true);
+              setFormErrors({});
+            }}
+            className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
+          >
+            Add note
+          </button>
+        </div>
       </div>
 
       <div className="mb-6">
@@ -202,62 +235,99 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
         </motion.div>
       )}
 
-      <div className="grid max-h-[420px] grid-cols-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
-        {filteredNotes.map((note) => (
-          <motion.div
-            key={note.id}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
-          >
-            <div className="mb-3 flex items-start justify-between gap-4">
-              <div>
-                <h3 className="text-lg font-semibold text-oxford-blue-500">{note.title}</h3>
-                <p className="type-subtle mt-1 text-xs uppercase tracking-[0.3em] text-charcoal-500">
-                  {new Date(note.createdAt).toLocaleDateString()}
-                </p>
+      {viewMode === "grid" ? (
+        <div className="grid max-h-[420px] grid-cols-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2 xl:grid-cols-3">
+          {filteredNotes.map((note) => (
+            <motion.div
+              key={note.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
+            >
+              <div className="mb-3 flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-oxford-blue-500">{note.title}</h3>
+                  <p className="type-subtle mt-1 text-xs uppercase tracking-[0.3em] text-charcoal-500">
+                    {new Date(note.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex gap-2 text-lg">
+                  <button
+                    onClick={() => startEdit(note)}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
+                    aria-label="Edit note"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M16.862 4.487l2.651 2.651m-9.193 9.193l-3.34.689.688-3.34 9.194-9.193a1.875 1.875 0 012.651 2.651l-9.193 9.193z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setNoteToDelete(note)}
+                    className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
+                    aria-label="Delete note"
+                  >
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7m1 0v11a2 2 0 01-2 2H10a2 2 0 01-2-2V7m3 4v6m4-6v6" />
+                    </svg>
+                  </button>
+                </div>
               </div>
-              <div className="flex gap-2 text-lg">
-                <button
-                  onClick={() => startEdit(note)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
-                  aria-label="Edit note"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M16.862 4.487l2.651 2.651m-9.193 9.193l-3.34.689.688-3.34 9.194-9.193a1.875 1.875 0 012.651 2.651l-9.193 9.193z" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setNoteToDelete(note)}
-                  className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
-                  aria-label="Delete note"
-                >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7m1 0v11a2 2 0 01-2 2H10a2 2 0 01-2-2V7m3 4v6m4-6v6" />
-                  </svg>
-                </button>
+              <p className="type-subtle mb-4 whitespace-pre-wrap text-sm leading-relaxed text-charcoal-500/90">
+                {note.content}
+              </p>
+              <div className="flex flex-wrap items-center justify-between text-xs text-charcoal-400">
+                <span>
+                  Created {new Date(note.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                </span>
+                {note.updatedAt && <span>Updated {new Date(note.updatedAt).toLocaleDateString()}</span>}
               </div>
-            </div>
-            <p className="type-subtle mb-4 whitespace-pre-wrap text-sm leading-relaxed text-charcoal-500/90">
-              {note.content}
-            </p>
-            <div className="flex flex-wrap items-center justify-between text-xs text-charcoal-400">
-              <span>
-                Created {new Date(note.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-              </span>
-              {note.updatedAt && <span>Updated {new Date(note.updatedAt).toLocaleDateString()}</span>}
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          ))}
 
-        {filteredNotes.length === 0 && (
-          <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-tea-green-700 text-center text-charcoal-400">
-            {searchTerm
-              ? "No notes match your search just yet."
-              : "Your notebook is clear. Start by adding a new entry."}
+          {filteredNotes.length === 0 && (
+            <div className="col-span-full flex h-48 items-center justify-center rounded-2xl border border-dashed border-tea-green-700 text-center text-charcoal-400">
+              {searchTerm
+                ? "No notes match your search just yet."
+                : "Your notebook is clear. Start by adding a new entry."}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="max-h-[420px] overflow-y-auto pr-1">
+          <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
+            {filteredNotes.map((note) => (
+              <div key={note.id} className="flex items-center gap-4 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{note.title}</h3>
+                    <span className="shrink-0 text-xs text-charcoal-400">{new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
+                  </div>
+                  <p className="type-subtle mt-1 line-clamp-1 text-xs text-charcoal-500/90">{note.content}</p>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => startEdit(note)}
+                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setNoteToDelete(note)}
+                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredNotes.length === 0 && (
+              <div className="flex h-36 items-center justify-center text-charcoal-400">
+                {searchTerm ? "No notes match your search just yet." : "Your notebook is clear. Start by adding a new entry."}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="mt-6">
         <button

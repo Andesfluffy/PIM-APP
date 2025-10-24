@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createTask, listTasks } from "@/lib/repositories/tasks";
+import { verifyAuth, unauthorized } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const tasks = await listTasks(userId ?? undefined);
+    const { uid } = await verifyAuth(req);
+    const tasks = await listTasks(uid);
     return NextResponse.json(tasks);
   } catch (err: any) {
     console.error("GET /api/tasks error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -37,13 +35,13 @@ export async function GET(req: NextRequest) {
 // }
 export async function POST(req: NextRequest) {
   try {
-    const { userId, title, description, status, priority, dueDate } =
-      await req.json();
-    if (!userId || !title)
+    const { uid } = await verifyAuth(req);
+    const { title, description, status, priority, dueDate } = await req.json();
+    if (!title)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
     const task = await createTask({
-      userId,
+      userId: uid,
       title,
       description,
       status,
@@ -53,9 +51,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(task, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/tasks error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

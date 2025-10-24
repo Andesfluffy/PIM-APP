@@ -50,14 +50,11 @@ export async function listContacts(userId?: string) {
   return result.rows.map(mapContact);
 }
 
-export async function findContact(id: string) {
+export async function findContact(id: string, userId?: string) {
   await ensureDatabase();
-  const result = await sql<ContactRow>`
-    SELECT *
-    FROM contacts
-    WHERE id = ${id}
-    LIMIT 1;
-  `;
+  const result = userId
+    ? await sql<ContactRow>`SELECT * FROM contacts WHERE id = ${id} AND user_id = ${userId} LIMIT 1;`
+    : await sql<ContactRow>`SELECT * FROM contacts WHERE id = ${id} LIMIT 1;`;
   const contact = result.rows[0];
   return contact ? mapContact(contact) : null;
 }
@@ -81,38 +78,39 @@ export async function createContact(data: {
 
 export async function updateContact(
   id: string,
-  updates: Partial<Pick<Contact, "name" | "email" | "phone">>
+  updates: Partial<Pick<Contact, "name" | "email" | "phone">>,
+  userId?: string
 ) {
   await ensureDatabase();
   const now = new Date();
-  const fields = [sql`updated_at = ${now}`];
-
-  if (updates.name !== undefined) {
-    fields.push(sql`name = ${updates.name}`);
-  }
-
-  if (updates.email !== undefined) {
-    fields.push(sql`email = ${updates.email}`);
-  }
-
-  if (updates.phone !== undefined) {
-    fields.push(sql`phone = ${updates.phone ?? null}`);
-  }
-
-  const result = await sql<ContactRow>`
-    UPDATE contacts
-    SET ${sql.join(fields, sql`, `)}
-    WHERE id = ${id}
-    RETURNING *;
-  `;
+  const result = userId
+    ? await sql<ContactRow>`
+        UPDATE contacts
+        SET name = COALESCE(${updates.name ?? null}, name),
+            email = COALESCE(${updates.email ?? null}, email),
+            phone = COALESCE(${updates.phone ?? null}, phone),
+            updated_at = ${now}
+        WHERE id = ${id} AND user_id = ${userId}
+        RETURNING *;
+      `
+    : await sql<ContactRow>`
+        UPDATE contacts
+        SET name = COALESCE(${updates.name ?? null}, name),
+            email = COALESCE(${updates.email ?? null}, email),
+            phone = COALESCE(${updates.phone ?? null}, phone),
+            updated_at = ${now}
+        WHERE id = ${id}
+        RETURNING *;
+      `;
   const row = result.rows[0];
   return row ? mapContact(row) : null;
 }
 
-export async function deleteContact(id: string) {
+export async function deleteContact(id: string, userId?: string) {
   await ensureDatabase();
-  await sql`
-    DELETE FROM contacts
-    WHERE id = ${id};
-  `;
+  if (userId) {
+    await sql`DELETE FROM contacts WHERE id = ${id} AND user_id = ${userId};`;
+  } else {
+    await sql`DELETE FROM contacts WHERE id = ${id};`;
+  }
 }

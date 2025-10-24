@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createNote, listNotes } from "@/lib/repositories/notes";
+import { verifyAuth, unauthorized } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-    const notes = await listNotes(userId ?? undefined);
+    const { uid } = await verifyAuth(req);
+    const notes = await listNotes(uid);
     return NextResponse.json(notes);
   } catch (err: any) {
     console.error("GET /api/notes error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
 
@@ -38,21 +36,20 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId, title, content } = await req.json();
-    if (!userId || !title || !content)
+    const { uid } = await verifyAuth(req);
+    const { title, content } = await req.json();
+    if (!title || !content)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
     const note = await createNote({
-      userId,
+      userId: uid,
       title,
       content,
     });
     return NextResponse.json(note, { status: 201 });
   } catch (err: any) {
     console.error("POST /api/notes error", err);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    if (err?.message === "UNAUTHORIZED") return unauthorized();
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

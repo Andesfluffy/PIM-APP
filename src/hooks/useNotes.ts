@@ -83,9 +83,12 @@ export function useNotes(userId: string | undefined) {
   // Fetch from backend
   useEffect(() => {
     if (userId) {
-      fetch(`/api/notes?userId=${userId}`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      fetch(`/api/notes`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
           return res.json();
         })
         .then((data) => {
@@ -98,44 +101,110 @@ export function useNotes(userId: string | undefined) {
           );
         })
         .catch((err) => {
+          if (String(err?.message || "").includes("401")) {
+            setNotes([]);
+            return;
+          }
           console.error("GET /api/notes failed", err);
           setNotes([]);
         });
     }
   }, [userId]);
 
+  // Light revalidation on window focus
+  useEffect(() => {
+    if (!userId) return;
+    const onFocus = () => {
+      fetch(`/api/notes`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
+          setNotes(
+            list.map((n: any) => ({
+              id: n._id,
+              ...n,
+            }))
+          );
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [userId]);
+
   const createNote = async (title: string, content: string) => {
-    const res = await fetch(`/api/notes`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, content, userId }),
-    });
-    if (!res.ok) {
-      console.error(`Failed to create note: ${res.status}`);
-      return;
+    const nowIso = new Date().toISOString();
+    const tempId = `temp_${Date.now()}`;
+    const tempNote: Note = {
+      id: tempId,
+      title,
+      content,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      userId: userId || "",
+    };
+
+    // Optimistically add to the top
+    setNotes((prev) => [tempNote, ...prev]);
+
+    try {
+      const res = await fetch(`/api/notes`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, content }),
+      });
+      if (!res.ok) throw new Error(`Failed to create note: ${res.status}`);
+      const newNote = await res.json();
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === tempId
+            ? {
+                id: newNote._id,
+                ...newNote,
+              }
+            : n
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic insert on failure
+      setNotes((prev) => prev.filter((n) => n.id !== tempId));
     }
-    const newNote = await res.json();
-    setNotes((prev) => [
-      ...prev,
-      {
-        id: newNote._id,
-        ...newNote,
-      },
-    ]);
   };
 
   const updateNote = async (id: string, updatedFields: Partial<Note>) => {
-    const res = await fetch(`/api/notes/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updatedFields),
-    });
-    const updatedNote = await res.json();
+    // Optimistic update
+    const prevNotes = notes.slice();
     setNotes((prev) =>
       prev.map((note) =>
-        note.id === id ? { id: updatedNote._id, ...updatedNote } : note
+        note.id === id ? { ...note, ...updatedFields, updatedAt: new Date().toISOString() } : note
       )
     );
+
+    try {
+      const res = await fetch(`/api/notes/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedFields),
+      });
+      if (!res.ok) throw new Error(`Failed to update note: ${res.status}`);
+      const updatedNote = await res.json();
+      setNotes((prev) =>
+        prev.map((note) =>
+          note.id === id ? { id: updatedNote._id, ...updatedNote } : note
+        )
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert on failure
+      setNotes(prevNotes);
+    }
   };
 
   const deleteNote = async (id: string) => {

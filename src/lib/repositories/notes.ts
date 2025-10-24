@@ -47,14 +47,11 @@ export async function listNotes(userId?: string) {
   return result.rows.map(mapNote);
 }
 
-export async function findNote(id: string) {
+export async function findNote(id: string, userId?: string) {
   await ensureDatabase();
-  const result = await sql<NoteRow>`
-    SELECT *
-    FROM notes
-    WHERE id = ${id}
-    LIMIT 1;
-  `;
+  const result = userId
+    ? await sql<NoteRow>`SELECT * FROM notes WHERE id = ${id} AND user_id = ${userId} LIMIT 1;`
+    : await sql<NoteRow>`SELECT * FROM notes WHERE id = ${id} LIMIT 1;`;
   const note = result.rows[0];
   return note ? mapNote(note) : null;
 }
@@ -77,27 +74,37 @@ export async function createNote(data: {
 
 export async function updateNote(
   id: string,
-  updates: Partial<Pick<Note, "title" | "content">>
+  updates: Partial<Pick<Note, "title" | "content">>,
+  userId?: string
 ) {
   await ensureDatabase();
   const now = new Date();
-  const result = await sql<NoteRow>`
-    UPDATE notes
-    SET
-      title = COALESCE(${updates.title ?? null}, title),
-      content = COALESCE(${updates.content ?? null}, content),
-      updated_at = ${now}
-    WHERE id = ${id}
-    RETURNING *;
-  `;
+  const result = userId
+    ? await sql<NoteRow>`
+        UPDATE notes
+        SET title = COALESCE(${updates.title ?? null}, title),
+            content = COALESCE(${updates.content ?? null}, content),
+            updated_at = ${now}
+        WHERE id = ${id} AND user_id = ${userId}
+        RETURNING *;
+      `
+    : await sql<NoteRow>`
+        UPDATE notes
+        SET title = COALESCE(${updates.title ?? null}, title),
+            content = COALESCE(${updates.content ?? null}, content),
+            updated_at = ${now}
+        WHERE id = ${id}
+        RETURNING *;
+      `;
   const row = result.rows[0];
   return row ? mapNote(row) : null;
 }
 
-export async function deleteNote(id: string) {
+export async function deleteNote(id: string, userId?: string) {
   await ensureDatabase();
-  await sql`
-    DELETE FROM notes
-    WHERE id = ${id};
-  `;
+  if (userId) {
+    await sql`DELETE FROM notes WHERE id = ${id} AND user_id = ${userId};`;
+  } else {
+    await sql`DELETE FROM notes WHERE id = ${id};`;
+  }
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { Task, useTasks } from "@/hooks/useTasks";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
 import ConfirmDialog from "./ConfirmDialog";
@@ -27,9 +27,19 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     dueDate: "",
   });
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [formErrors, setFormErrors] = useState<TaskErrors>({});
+
+  // Persist view mode selection
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("tasks_view_mode") : null;
+    if (saved === "grid" || saved === "list") setViewMode(saved);
+  }, []);
+  useEffect(() => {
+    if (typeof window !== "undefined") localStorage.setItem("tasks_view_mode", viewMode);
+  }, [viewMode]);
 
   const resetForm = () => {
     setNewTask({
@@ -71,7 +81,6 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
       priority: newTask.priority,
       dueDate: newTask.dueDate ? new Date(newTask.dueDate).toISOString() : undefined,
       status: "pending",
-      userId,
     });
 
     resetForm();
@@ -111,8 +120,9 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
     updateTask(task.id, { status });
   };
 
-  const filteredTasks = tasks.filter((task) =>
-    filter === "all" ? true : task.status === filter
+  const filteredTasks = useMemo(
+    () => tasks.filter((task) => (filter === "all" ? true : task.status === filter)),
+    [tasks, filter]
   );
 
   const getStatusBadge = (status: Task["status"]) => {
@@ -151,15 +161,35 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
             Structure your day with elegant boards that balance priorities and progress.
           </p>
         </div>
-        <button
-          onClick={() => {
-            setIsCreating(true);
-            setFormErrors({});
-          }}
-          className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
-        >
-          Add task
-        </button>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex rounded-xl border border-tea-green-700 bg-white/85 p-1 text-xs">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "grid" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              Cards
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`rounded-lg px-3 py-1 font-semibold ${
+                viewMode === "list" ? "bg-naples-yellow-900 text-oxford-blue-500" : "text-oxford-blue-400"
+              }`}
+            >
+              List
+            </button>
+          </div>
+          <button
+            onClick={() => {
+              setIsCreating(true);
+              setFormErrors({});
+            }}
+            className="rounded-2xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-6 py-3 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
+          >
+            Add task
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -292,6 +322,7 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
         </motion.div>
       )}
 
+      {viewMode === "grid" && (
       <div className="grid max-h-[420px] grid-cols-1 gap-4 overflow-y-auto pr-1 md:grid-cols-2">
         {filteredTasks.map((task) => (
           <motion.div
@@ -356,6 +387,64 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           </div>
         )}
       </div>
+      )}
+
+      {viewMode === "list" && (
+        <div className="max-h-[420px] overflow-y-auto pr-1">
+          <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
+            {filteredTasks.map((task) => (
+              <div key={task.id} className="flex items-center gap-4 px-4 py-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getPriorityBadge(task.priority)}`}>
+                        <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
+                        {task.priority}
+                      </span>
+                      <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{task.title}</h3>
+                    </div>
+                    <div className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadge(task.status)}`}>
+                      {task.status === "completed" ? "Completed" : "In progress"}
+                    </div>
+                  </div>
+                  {task.description && (
+                    <p className="type-subtle mt-1 line-clamp-1 text-xs text-charcoal-500/90">{task.description}</p>
+                  )}
+                  <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-charcoal-400">
+                    <span>Updated {new Date(task.updatedAt ?? task.createdAt).toLocaleDateString()}</span>
+                    {task.dueDate && <span>• Due {new Date(task.dueDate).toLocaleDateString()}</span>}
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <button
+                    onClick={() => updateStatus(task, task.status === "completed" ? "pending" : "completed")}
+                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                  >
+                    {task.status === "completed" ? "Mark pending" : "Mark completed"}
+                  </button>
+                  <button
+                    onClick={() => startEdit(task)}
+                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => setTaskToDelete(task)}
+                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+            {filteredTasks.length === 0 && (
+              <div className="flex h-36 items-center justify-center text-charcoal-400">
+                {filter === "all" ? "No tasks yet. Create your first plan." : "Nothing matches this filter right now."}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6">
         <button
@@ -391,3 +480,4 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
 };
 
 export default Tasks;
+

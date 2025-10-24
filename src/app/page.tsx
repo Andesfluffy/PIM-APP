@@ -21,7 +21,7 @@ const featureTiles = [
     title: "Notes atelier",
     description:
       "Compose and structure ideas inside layered cards with poised typography and soft accents.",
-    icon: "🪶",
+    icon: "N",
     accent: "from-red-crayola-100/70 via-transparent to-red-crayola-200/60",
   },
   {
@@ -29,7 +29,7 @@ const featureTiles = [
     title: "Task board",
     description:
       "Track progress with elegant priority chips, clean timelines, and contextual nudges.",
-    icon: "📅",
+    icon: "T",
     accent: "from-naples-yellow-100/70 via-transparent to-naples-yellow-200/60",
   },
   {
@@ -37,7 +37,7 @@ const featureTiles = [
     title: "Contact ledger",
     description:
       "Maintain polished relationship cards with intelligent search and refined details.",
-    icon: "🤝",
+    icon: "C",
     accent: "from-tea-green-100/70 via-transparent to-tea-green-200/60",
   },
 ];
@@ -54,11 +54,8 @@ export default function HomePage() {
   const isAuthenticated = !!user;
 
   useEffect(() => {
-    if (isAuthenticated) {
-      setView("dashboard");
-    } else {
-      setView("auth");
-    }
+    if (isAuthenticated) setView("dashboard");
+    else setView("auth");
   }, [isAuthenticated]);
 
   if (loading) {
@@ -108,7 +105,7 @@ export default function HomePage() {
                 <div className="flex flex-col gap-12 p-8 sm:p-12 lg:p-16">
                   <div className="space-y-7">
                     <div className="inline-flex items-center gap-3 rounded-full border border-naples-yellow-700/50 bg-naples-yellow-900/70 px-5 py-2 text-xs font-semibold uppercase tracking-[0.32em] text-oxford-blue-300 sm:text-sm">
-                      <span className="text-lg sm:text-xl">✨</span>
+                      <span className="text-lg sm:text-xl">*</span>
                       Aurora workspace
                     </div>
                     <div className="space-y-5">
@@ -116,26 +113,17 @@ export default function HomePage() {
                         A composed command centre for your day.
                       </h1>
                       <p className="type-subtle text-base leading-relaxed text-charcoal-500/85">
-                        Gather notes, priorities, and relationships inside a deliberate rhythm. Sign in once and every surface stays aligned in the background.
+                        Gather notes, tasks, and contacts in a single calm surface designed for focus.
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                      <LoginButton variant="solid" fullWidth className="sm:max-w-xs">
-                        <span className="text-base font-semibold">Sign in with Google</span>
-                      </LoginButton>
-                      <button
-                        type="button"
-                        onClick={() => setView("notes")}
-                        className="type-subtle inline-flex items-center justify-center rounded-2xl border border-charcoal-800/70 px-4 py-3 text-sm font-semibold text-oxford-blue-400 transition-all duration-200 hover:border-oxford-blue-400 hover:text-oxford-blue-500"
-                      >
-                        Tour the live suite
-                      </button>
-                    </div>
+                    <LoginButton variant="solid" fullWidth className="sm:max-w-xs">
+                      <span className="text-base font-semibold">Sign in with Google</span>
+                    </LoginButton>
                     <p className="type-subtle text-xs text-charcoal-600/80">
-                      Google sign-in unlocks the full workspace now. Personal email onboarding is arriving soon.
+                      Sign in to access your workspace.
                     </p>
                   </div>
 
@@ -156,7 +144,7 @@ export default function HomePage() {
                   <div className="relative h-56 overflow-hidden rounded-[30px] border border-charcoal-900/15 bg-oxford-blue-900/10 sm:h-64">
                     <Image
                       src={heroImage}
-                      alt="Aurora workspace preview"
+                      alt="Aurora workspace"
                       fill
                       priority
                       sizes="(min-width: 1024px) 360px, 100vw"
@@ -164,9 +152,9 @@ export default function HomePage() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-oxford-blue-900/60 via-oxford-blue-900/20 to-transparent" />
                     <div className="absolute bottom-6 left-6 right-6 rounded-2xl bg-white/85 p-5 text-oxford-blue-500 shadow-[0_30px_60px_-40px_rgba(1,25,54,0.65)] backdrop-blur">
-                      <p className="text-[11px] uppercase tracking-[0.36em] text-charcoal-500">Preview</p>
+                      <p className="text-[11px] uppercase tracking-[0.36em] text-charcoal-500">Welcome</p>
                       <p className="mt-2 text-sm font-semibold text-oxford-blue-500">
-                        Flow through notes, tasks, and contacts without trading precision for calm.
+                        Sign in to flow through notes, tasks, and contacts.
                       </p>
                     </div>
                   </div>
@@ -292,55 +280,12 @@ export default function HomePage() {
                   </div>
                 </motion.div>
               )}
-
-              {!isAuthenticated && view !== "auth" && (
-                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                  <button
-                    onClick={() => setView("auth")}
-                    className="type-subtle group inline-flex items-center gap-2 text-sm font-semibold text-oxford-blue-400 transition hover:text-oxford-blue-500"
-                  >
-                    <span className="transition-transform group-hover:-translate-x-1">←</span>
-                    Back to sign in
-                  </button>
-
-                  <div className="text-center">
-                    <div className="preview-card mx-auto mb-8 max-w-2xl rounded-3xl border border-tea-green-700 p-8 text-oxford-blue-500">
-                      <h2 className="text-3xl text-oxford-blue-500">Workspace preview</h2>
-                      <p className="type-subtle mt-3 text-sm text-charcoal-500">
-                        Sign in with Google to keep your workspace perfectly synced across every device.
-                      </p>
-                      <div className="mt-6 flex justify-center">
-                        <LoginButton variant="solid" />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div>
-                    {view === "notes" && (
-                      <Notes onBackToDashboard={() => setView("auth")} />
-                    )}
-                    {view === "tasks" && (
-                      <Tasks onBackToDashboard={() => setView("auth")} />
-                    )}
-                    {view === "contacts" && (
-                      <Contacts onBackToDashboard={() => setView("auth")} />
-                    )}
-                  </div>
-                </motion.div>
-              )}
             </div>
           </motion.section>
         )}
       </AnimatePresence>
-
-      <style jsx global>{`
-        .preview-card {
-          background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(254, 248, 223, 0.9));
-          box-shadow: 0 30px 60px -38px rgba(1, 25, 54, 0.35);
-          backdrop-filter: blur(22px);
-          -webkit-backdrop-filter: blur(22px);
-        }
-      `}</style>
     </main>
   );
 }
+
+

@@ -97,9 +97,12 @@ export function useTasks(userId: string | undefined) {
 
   useEffect(() => {
     if (userId) {
-      fetch(`/api/tasks?userId=${userId}`)
-        .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      fetch(`/api/tasks`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
           return res.json();
         })
         .then((data) => {
@@ -112,44 +115,110 @@ export function useTasks(userId: string | undefined) {
           );
         })
         .catch((err) => {
+          if (String(err?.message || "").includes("401")) {
+            setTasks([]);
+            return;
+          }
           console.error("GET /api/tasks failed", err);
           setTasks([]);
         });
     }
   }, [userId]);
 
+  // Light revalidation on window focus
+  useEffect(() => {
+    if (!userId) return;
+    const onFocus = () => {
+      fetch(`/api/tasks`)
+        .then(async (res) => {
+          if (!res.ok) {
+            if (res.status === 401) return [] as any[];
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          const list = Array.isArray(data) ? data : [];
+          setTasks(
+            list.map((t: any) => ({
+              id: t._id,
+              ...t,
+            }))
+          );
+        })
+        .catch(() => {});
+    };
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [userId]);
+
   const createTask = async (
     task: Omit<Task, "id" | "createdAt" | "updatedAt">
   ) => {
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(task),
-    });
-    if (!res.ok) {
-      console.error(`Failed to create task: ${res.status}`);
-      return;
+    const nowIso = new Date().toISOString();
+    const tempId = `temp_${Date.now()}`;
+    const tempTask: Task = {
+      id: tempId,
+      title: task.title,
+      description: task.description || "",
+      status: task.status,
+      priority: task.priority,
+      dueDate: task.dueDate,
+      createdAt: nowIso,
+      updatedAt: nowIso,
+      userId: userId || "",
+    };
+
+    // Optimistically add to the top
+    setTasks((prev) => [tempTask, ...prev]);
+
+    try {
+      const res = await fetch("/api/tasks", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          dueDate: task.dueDate,
+        }),
+      });
+      if (!res.ok) throw new Error(`Failed to create task: ${res.status}`);
+      const newTask = await res.json();
+      setTasks((prev) =>
+        prev.map((t) => (t.id === tempId ? { id: newTask._id, ...newTask } : t))
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert optimistic insert
+      setTasks((prev) => prev.filter((t) => t.id !== tempId));
     }
-    const newTask = await res.json();
-    setTasks((prev) => [
-      ...prev,
-      {
-        id: newTask._id,
-        ...newTask,
-      },
-    ]);
   };
 
   const updateTask = async (id: string, updates: Partial<Task>) => {
-    const res = await fetch(`/api/tasks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    const updated = await res.json();
+    // Optimistic update for snappy UX (e.g., mark as completed)
+    const prevTasks = tasks.slice();
     setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { id: updated._id, ...updated } : t))
+      prev.map((t) => (t.id === id ? { ...t, ...updates, updatedAt: new Date().toISOString() } : t))
     );
+
+    try {
+      const res = await fetch(`/api/tasks/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+      if (!res.ok) throw new Error(`Failed to update task: ${res.status}`);
+      const updated = await res.json();
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { id: updated._id, ...updated } : t))
+      );
+    } catch (err) {
+      console.error(err);
+      // Revert on failure
+      setTasks(prevTasks);
+    }
   };
 
   const deleteTask = async (id: string) => {
