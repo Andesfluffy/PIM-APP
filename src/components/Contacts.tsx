@@ -4,8 +4,10 @@ import { Contact, useContacts } from "@/hooks/useContacts";
 import {
   CONTACT_EMAIL_REGEX,
   CONTACT_PHONE_REGEX,
+  MAX_PHONE_DIGITS,
   isValidEmail,
   isValidPhone,
+  clampPhoneDigits,
   sanitizeContactInput,
 } from "@/lib/validation/contact";
 import { useEffect, useMemo, useState } from "react";
@@ -66,7 +68,7 @@ const Contacts = ({ userId }: ContactsProps) => {
       errors.email = "Enter a valid email address.";
     }
     if (!isValidPhone(sanitized.phone)) {
-      errors.phone = "Use 7-20 digits with spaces, parentheses, periods, or dashes.";
+      errors.phone = "Use 7 to 11 digits without letters.";
     }
     setFormErrors(errors);
     return errors;
@@ -112,7 +114,7 @@ const Contacts = ({ userId }: ContactsProps) => {
     setNewContact({
       name: contact.name,
       email: contact.email,
-      phone: contact.phone || "",
+      phone: clampPhoneDigits(contact.phone),
     });
     setFormErrors({});
     setIsCreating(true);
@@ -258,7 +260,7 @@ const Contacts = ({ userId }: ContactsProps) => {
                 placeholder="Phone number"
                 value={newContact.phone}
                 onChange={(e) => {
-                  const value = e.target.value;
+                  const value = clampPhoneDigits(e.target.value);
                   setNewContact((prev) => ({ ...prev, phone: value }));
                   if (formErrors.phone && isValidPhone(value)) {
                     setFormErrors((prev) => ({ ...prev, phone: undefined }));
@@ -266,6 +268,7 @@ const Contacts = ({ userId }: ContactsProps) => {
                 }}
                 inputMode="tel"
                 pattern={CONTACT_PHONE_REGEX.source}
+                maxLength={MAX_PHONE_DIGITS}
                 className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.phone
                     ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"

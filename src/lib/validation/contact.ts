@@ -1,24 +1,38 @@
 export const CONTACT_EMAIL_REGEX =
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
 
-// Accept common international formats while disallowing alphabetic characters.
-// Requires at least 7 digits (ignoring spacing characters) and allows
-// spaces, parentheses, periods, and dashes for readability.
-export const CONTACT_PHONE_REGEX = /^(?=(?:.*\d){7,})\+?[0-9()\s.-]{7,20}$/;
+export const MIN_PHONE_DIGITS = 7;
+export const MAX_PHONE_DIGITS = 11;
+
+export const CONTACT_PHONE_REGEX = new RegExp(
+  `^\\d{${MIN_PHONE_DIGITS},${MAX_PHONE_DIGITS}}$`
+);
+
+const NON_DIGIT_REGEX = /\D+/g;
+
+export function extractPhoneDigits(
+  phone: string | null | undefined
+): string {
+  return (phone ?? "").replace(NON_DIGIT_REGEX, "");
+}
+
+export function clampPhoneDigits(phone: string | null | undefined): string {
+  return extractPhoneDigits(phone).slice(0, MAX_PHONE_DIGITS);
+}
 
 export function isValidEmail(email: string): boolean {
   return CONTACT_EMAIL_REGEX.test(email.trim());
 }
 
 export function isValidPhone(phone: string | null | undefined): boolean {
-  const trimmed = (phone ?? "").trim();
-  if (!trimmed) return true;
+  const digits = extractPhoneDigits(phone);
+  if (!digits) return true;
 
-  // Ensure at least 7 digits when non-empty.
-  const digitCount = (trimmed.match(/\d/g) || []).length;
-  if (digitCount < 7) return false;
-
-  return CONTACT_PHONE_REGEX.test(trimmed);
+  return (
+    digits.length >= MIN_PHONE_DIGITS &&
+    digits.length <= MAX_PHONE_DIGITS &&
+    CONTACT_PHONE_REGEX.test(digits)
+  );
 }
 
 export function sanitizeContactInput<T extends { name?: string; email?: string; phone?: string | null }>(
@@ -28,6 +42,6 @@ export function sanitizeContactInput<T extends { name?: string; email?: string; 
     ...input,
     name: input.name?.trim() ?? "",
     email: input.email?.trim() ?? "",
-    phone: input.phone?.trim() ?? "",
+    phone: extractPhoneDigits(input.phone),
   };
 }
