@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createContact, listContacts } from "@/lib/repositories/contacts";
+import {
+  isValidEmail,
+  isValidPhone,
+  sanitizeContactInput,
+} from "@/lib/validation/contact";
 import { verifyAuth, unauthorized } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
@@ -37,14 +42,23 @@ export async function POST(req: NextRequest) {
   try {
     const { uid } = await verifyAuth(req);
     const { name, email, phone } = await req.json();
-    if (!name || !email)
+    const sanitized = sanitizeContactInput({ name, email, phone });
+    if (!sanitized.name || !sanitized.email)
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
+
+    if (!isValidEmail(sanitized.email)) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    }
+
+    if (!isValidPhone(sanitized.phone)) {
+      return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
+    }
 
     const contact = await createContact({
       userId: uid,
-      name,
-      email,
-      phone,
+      name: sanitized.name,
+      email: sanitized.email,
+      phone: sanitized.phone || null,
     });
     return NextResponse.json(contact, { status: 201 });
   } catch (err: any) {

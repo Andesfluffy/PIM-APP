@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteContact, findContact, updateContact as updateContactRecord } from "@/lib/repositories/contacts";
 import { verifyAuth } from "@/lib/auth";
+import { isValidEmail, isValidPhone, sanitizeContactInput } from "@/lib/validation/contact";
 
 export async function GET(
   req: NextRequest,
@@ -28,11 +29,32 @@ export async function PUT(
   try {
     const { uid } = await verifyAuth(req);
     const body = await req.json();
+    const hasName = Object.prototype.hasOwnProperty.call(body, "name");
+    const hasEmail = Object.prototype.hasOwnProperty.call(body, "email");
+    const hasPhone = Object.prototype.hasOwnProperty.call(body, "phone");
+    const sanitized = sanitizeContactInput(body);
+
+    if (hasName && !sanitized.name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    if (hasEmail && !sanitized.email) {
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
+    }
+
+    if (sanitized.email && !isValidEmail(sanitized.email)) {
+      return NextResponse.json({ error: "Invalid email" }, { status: 400 });
+    }
+
+    if (hasPhone && !isValidPhone(sanitized.phone)) {
+      return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
+    }
+
     const { id } = await params;
     const updated = await updateContactRecord(id, {
-      name: body.name,
-      email: body.email,
-      phone: body.phone,
+      name: sanitized.name || undefined,
+      email: sanitized.email || undefined,
+      phone: hasPhone ? (sanitized.phone ? sanitized.phone : null) : undefined,
     }, uid);
     if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
