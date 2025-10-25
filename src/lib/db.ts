@@ -16,8 +16,10 @@ async function ensureClientConnection() {
     return;
   }
 
-  const pooledUrl = process.env.POSTGRES_URL;
-  const directUrl = process.env.POSTGRES_URL_NON_POOLING;
+  const pooledUrl =
+    process.env.POSTGRES_URL || process.env.VERCEL_POSTGRES_URL || null;
+  const directUrl =
+    process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || null;
 
   // If a pooled URL is provided, try using pooled client first.
   if (pooledUrl) {
@@ -37,7 +39,12 @@ async function ensureClientConnection() {
         }
       }
     })();
-    await connectionPromise;
+    try {
+      await connectionPromise;
+    } catch (err) {
+      connectionPromise = null;
+      throw err;
+    }
     return;
   }
 
@@ -48,7 +55,12 @@ async function ensureClientConnection() {
       sql = client.sql;
       await client.connect();
     })();
-    await connectionPromise;
+    try {
+      await connectionPromise;
+    } catch (err) {
+      connectionPromise = null;
+      throw err;
+    }
     return;
   }
 
@@ -110,13 +122,24 @@ async function createTables() {
 
 export async function ensureDatabase() {
   // Ensure a Postgres connection string is configured
-  if (!process.env.POSTGRES_URL && !process.env.POSTGRES_URL_NON_POOLING) {
+  if (
+    !process.env.POSTGRES_URL &&
+    !process.env.POSTGRES_URL_NON_POOLING &&
+    !process.env.VERCEL_POSTGRES_URL &&
+    !process.env.DATABASE_URL
+  ) {
     throw new Error(
-      "Missing Postgres connection string. Set POSTGRES_URL (or POSTGRES_URL_NON_POOLING) in .env.local."
+      "Missing Postgres connection string. Set POSTGRES_URL, POSTGRES_URL_NON_POOLING, VERCEL_POSTGRES_URL, or DATABASE_URL in .env.local."
     );
   }
   if (initialized) return;
-  await ensureClientConnection();
+  try {
+    await ensureClientConnection();
+  } catch (err) {
+    // Allow retries if the first connection attempt fails (e.g. DB starts slowly)
+    connectionPromise = null;
+    throw err;
+  }
   await createTables();
   initialized = true;
 }
