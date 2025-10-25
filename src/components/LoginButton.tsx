@@ -47,31 +47,39 @@ export default function LoginButton({
   };
 
   const baseClasses =
-    "group relative flex items-center justify-center gap-3 rounded-xl px-5 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2";
+    "group relative isolate flex items-center justify-start gap-3 overflow-hidden rounded-2xl px-6 py-3 text-left text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
   const variantClasses =
     variant === "solid"
-      ? "bg-red-crayola-500 text-white shadow-[0_18px_35px_rgba(237,37,78,0.18)] hover:-translate-y-0.5 hover:shadow-[0_24px_45px_rgba(237,37,78,0.25)] focus-visible:outline-red-crayola-500"
-      : "border border-charcoal-900 bg-white text-charcoal-600 shadow-sm hover:border-red-crayola-400 hover:text-red-crayola-500 focus-visible:outline-red-crayola-400";
-  const widthClass = fullWidth ? "w-full" : "";
+      ? "border border-white/20 bg-gradient-to-r from-red-crayola-500 via-red-crayola-400 to-naples-yellow-400 text-white shadow-[0_22px_55px_-30px_rgba(237,37,78,0.65)] backdrop-blur hover:-translate-y-0.5 hover:shadow-[0_30px_75px_-32px_rgba(237,37,78,0.7)] focus-visible:ring-red-crayola-200/70 focus-visible:ring-offset-white"
+      : "border border-oxford-blue-200/60 bg-white/75 text-oxford-blue-500 shadow-[0_18px_42px_-28px_rgba(1,25,54,0.45)] backdrop-blur focus-visible:ring-oxford-blue-200/70 focus-visible:ring-offset-white hover:border-oxford-blue-300 hover:bg-white/90";
+  const widthClass = fullWidth ? "w-full" : undefined;
   const disabledClass = credentialsUnavailable
-    ? "cursor-not-allowed opacity-60 hover:translate-y-0 hover:shadow-none"
-    : "";
+    ? "cursor-not-allowed opacity-70 hover:translate-y-0 hover:shadow-none"
+    : undefined;
+  const contentClasses = fullWidth
+    ? "flex w-full items-center gap-3"
+    : "flex items-center gap-3";
+  const labelClasses = fullWidth
+    ? "flex-1 truncate text-left"
+    : "text-left";
 
   return (
     <button
       type="button"
       onClick={signInWithGoogle}
       disabled={credentialsUnavailable}
-      className={`${baseClasses} ${variantClasses} ${widthClass} ${disabledClass} ${className}`.trim()}
+      className={[baseClasses, variantClasses, widthClass, disabledClass, className]
+        .filter(Boolean)
+        .join(" ")}
       title={
         credentialsUnavailable
           ? "Google sign-in is not available in this environment."
           : undefined
       }
     >
-      <span className="flex items-center gap-3">
-        <span className="flex h-5 w-5 items-center justify-center">
-          <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5">
+      <span className={contentClasses}>
+        <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center">
+          <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">
             <path
               fill="#4285F4"
               d="M21.6 12.23c0-.83-.07-1.63-.21-2.4H12v4.55h5.41c-.23 1.24-.95 2.28-2.01 2.98v2.48h3.25c1.9-1.75 2.95-4.33 2.95-7.61z"
@@ -90,7 +98,7 @@ export default function LoginButton({
             />
           </svg>
         </span>
-        <span>{children ?? "Sign in with Google"}</span>
+        <span className={labelClasses}>{children ?? "Sign in with Google"}</span>
       </span>
     </button>
   );

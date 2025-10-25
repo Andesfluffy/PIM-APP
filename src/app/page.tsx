@@ -251,32 +251,23 @@ export default function HomePage() {
               {isAuthenticated && view !== "dashboard" && view !== "auth" && user && (
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                   <button
+                    type="button"
                     onClick={() => setView("dashboard")}
-                    className="type-subtle group inline-flex items-center gap-2 text-sm font-semibold text-oxford-blue-400 transition hover:text-oxford-blue-500"
+                    className="group inline-flex items-center gap-2 rounded-full border border-oxford-blue-200/60 bg-white/80 px-4 py-2 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_38px_-28px_rgba(1,25,54,0.45)] transition-all duration-300 hover:bg-white/95 hover:shadow-[0_24px_60px_-34px_rgba(1,25,54,0.48)] focus:outline-none focus-visible:ring-2 focus-visible:ring-oxford-blue-300/70 focus-visible:ring-offset-2"
                   >
-                    <span className="transition-transform group-hover:-translate-x-1">←</span>
+                    <span
+                      aria-hidden
+                      className="text-base transition-transform duration-300 group-hover:-translate-x-1"
+                    >
+                      ←
+                    </span>
                     Back to dashboard
                   </button>
 
                   <div>
-                    {view === "notes" && (
-                      <Notes
-                        userId={user.id}
-                        onBackToDashboard={() => setView("dashboard")}
-                      />
-                    )}
-                    {view === "tasks" && (
-                      <Tasks
-                        userId={user.id}
-                        onBackToDashboard={() => setView("dashboard")}
-                      />
-                    )}
-                    {view === "contacts" && (
-                      <Contacts
-                        userId={user.id}
-                        onBackToDashboard={() => setView("dashboard")}
-                      />
-                    )}
+                    {view === "notes" && <Notes userId={user.id} />}
+                    {view === "tasks" && <Tasks userId={user.id} />}
+                    {view === "contacts" && <Contacts userId={user.id} />}
                   </div>
                 </motion.div>
               )}
