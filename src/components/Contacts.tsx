@@ -1,6 +1,13 @@
 "use client";
 
 import { Contact, useContacts } from "@/hooks/useContacts";
+import {
+  CONTACT_EMAIL_REGEX,
+  CONTACT_PHONE_REGEX,
+  isValidEmail,
+  isValidPhone,
+  sanitizeContactInput,
+} from "@/lib/validation/contact";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
@@ -32,9 +39,6 @@ const Contacts = ({ userId }: ContactsProps) => {
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [formErrors, setFormErrors] = useState<ContactErrors>({});
 
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^\+?[0-9\-\s()]{0,20}$/;
-
   // Persist view mode selection
   useEffect(() => {
     const saved = typeof window !== "undefined" ? localStorage.getItem("contacts_view_mode") : null;
@@ -53,14 +57,16 @@ const Contacts = ({ userId }: ContactsProps) => {
 
   const validateForm = () => {
     const errors: ContactErrors = {};
-    if (!newContact.name.trim()) {
+    const sanitized = sanitizeContactInput(newContact);
+
+    if (!sanitized.name) {
       errors.name = "Please add the contact's name.";
     }
-    if (!emailRegex.test(newContact.email.trim())) {
+    if (!isValidEmail(sanitized.email)) {
       errors.email = "Enter a valid email address.";
     }
-    if (newContact.phone && !phoneRegex.test(newContact.phone.trim())) {
-      errors.phone = "Use digits, spaces, parentheses, or dashes only.";
+    if (!isValidPhone(sanitized.phone)) {
+      errors.phone = "Use 7-20 digits with spaces, parentheses, periods, or dashes.";
     }
     setFormErrors(errors);
     return errors;
@@ -73,10 +79,12 @@ const Contacts = ({ userId }: ContactsProps) => {
       return;
     }
 
+    const sanitized = sanitizeContactInput(newContact);
+
     createContact({
-      name: newContact.name.trim(),
-      email: newContact.email.trim(),
-      phone: newContact.phone.trim() || undefined,
+      name: sanitized.name,
+      email: sanitized.email,
+      phone: sanitized.phone || undefined,
     });
     resetForm();
   };
@@ -89,10 +97,12 @@ const Contacts = ({ userId }: ContactsProps) => {
       return;
     }
 
+    const sanitized = sanitizeContactInput(newContact);
+
     updateContact(editingContact.id, {
-      name: newContact.name.trim(),
-      email: newContact.email.trim(),
-      phone: newContact.phone.trim() || undefined,
+      name: sanitized.name,
+      email: sanitized.email,
+      phone: sanitized.phone || undefined,
     });
     resetForm();
   };
@@ -223,10 +233,11 @@ const Contacts = ({ userId }: ContactsProps) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setNewContact((prev) => ({ ...prev, email: value }));
-                  if (formErrors.email && emailRegex.test(value.trim())) {
+                  if (formErrors.email && isValidEmail(value)) {
                     setFormErrors((prev) => ({ ...prev, email: undefined }));
                   }
                 }}
+                pattern={CONTACT_EMAIL_REGEX.source}
                 className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.email
                     ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
@@ -249,10 +260,12 @@ const Contacts = ({ userId }: ContactsProps) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setNewContact((prev) => ({ ...prev, phone: value }));
-                  if (formErrors.phone && phoneRegex.test(value.trim())) {
+                  if (formErrors.phone && isValidPhone(value)) {
                     setFormErrors((prev) => ({ ...prev, phone: undefined }));
                   }
                 }}
+                inputMode="tel"
+                pattern={CONTACT_PHONE_REGEX.source}
                 className={`w-full rounded-xl border px-4 py-3 text-sm text-oxford-blue-500 placeholder:text-charcoal-400 focus:outline-none focus:ring-2 ${
                   formErrors.phone
                     ? "border-red-crayola-400 bg-red-crayola-900 focus:ring-red-crayola-200"
