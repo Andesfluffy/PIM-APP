@@ -8,7 +8,6 @@ import ConfirmDialog from "./ConfirmDialog";
 
 type NotesProps = {
   userId?: string;
-  onBackToDashboard: () => void;
 };
 
 type NoteErrors = {
@@ -16,7 +15,7 @@ type NoteErrors = {
   content?: string;
 };
 
-const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
+const Notes = ({ userId }: NotesProps) => {
   const { notes, createNote, updateNote, deleteNote } = useNotes(userId);
   const [isCreating, setIsCreating] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
@@ -328,15 +327,6 @@ const Notes = ({ userId, onBackToDashboard }: NotesProps) => {
           </div>
         </div>
       )}
-
-      <div className="mt-6">
-        <button
-          onClick={onBackToDashboard}
-          className="type-subtle text-sm font-semibold text-oxford-blue-400 transition-colors hover:text-red-crayola-500"
-        >
-          ← Back to dashboard
-        </button>
-      </div>
 
       <ConfirmDialog
         isOpen={!!noteToDelete}
