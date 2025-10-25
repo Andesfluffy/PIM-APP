@@ -8,7 +8,6 @@ import ConfirmDialog from "./ConfirmDialog";
 
 type TasksProps = {
   userId?: string;
-  onBackToDashboard: () => void;
 };
 
 type TaskErrors = {
@@ -16,7 +15,7 @@ type TaskErrors = {
   dueDate?: string;
 };
 
-const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
+const Tasks = ({ userId }: TasksProps) => {
   const { tasks, createTask, updateTask, deleteTask } = useTasks(userId);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -445,15 +444,6 @@ const Tasks = ({ userId, onBackToDashboard }: TasksProps) => {
           </div>
         </div>
       )}
-
-      <div className="mt-6">
-        <button
-          onClick={onBackToDashboard}
-          className="type-subtle text-sm font-semibold text-oxford-blue-400 transition-colors hover:text-red-crayola-500"
-        >
-          ← Back to dashboard
-        </button>
-      </div>
 
       <ConfirmDialog
         isOpen={!!taskToDelete}
