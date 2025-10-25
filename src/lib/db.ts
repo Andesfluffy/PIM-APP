@@ -1,8 +1,68 @@
-import { createClient, sql as pooledSql } from "@vercel/postgres";
+import {
+  createClient,
+  createPool,
+  sql as pooledSql,
+} from "@vercel/postgres";
+import type { VercelClient, VercelPool } from "@vercel/postgres";
 
-let sql = pooledSql;
+type SqlExecutor = typeof pooledSql;
+
+let sql: SqlExecutor = pooledSql;
 let initialized = false;
 let connectionPromise: Promise<void> | null = null;
+let activeClient: VercelClient | null = null;
+let activePool: VercelPool | null = null;
+
+// Errors that indicate the connection is gone and should be re-established.
+const RETRYABLE_ERROR_CODES = new Set([
+  "57P01", // admin_shutdown
+  "57P02", // crash_shutdown
+  "57P03", // cannot_connect_now
+  "08003", // connection_does_not_exist
+  "08006", // connection_failure
+  "ECONNRESET",
+  "ECONNREFUSED",
+]);
+
+async function closeActiveHandles() {
+  const tasks: Promise<unknown>[] = [];
+  if (activeClient) {
+    const client = activeClient;
+    activeClient = null;
+    tasks.push(client.end().catch(() => undefined));
+  }
+  if (activePool) {
+    const pool = activePool;
+    activePool = null;
+    tasks.push(pool.end().catch(() => undefined));
+  }
+  if (tasks.length) {
+    await Promise.all(tasks);
+  }
+}
+
+async function resetConnectionState() {
+  await closeActiveHandles();
+  connectionPromise = null;
+  initialized = false;
+  sql = pooledSql;
+}
+
+function shouldResetForError(err: unknown) {
+  const error = err as any;
+  const code = error?.code;
+  if (typeof code === "string" && RETRYABLE_ERROR_CODES.has(code)) {
+    return true;
+  }
+  const message =
+    typeof error?.message === "string" ? error.message : String(error ?? "");
+  return (
+    message.includes("Connection terminated unexpectedly") ||
+    message.includes("Client has encountered a connection error") ||
+    message.includes("socket hang up") ||
+    message.includes("The connection was closed")
+  );
+}
 
 function isInvalidConnStringError(err: unknown) {
   const msg = (err as any)?.message || String(err);
@@ -21,50 +81,53 @@ async function ensureClientConnection() {
   const directUrl =
     process.env.POSTGRES_URL_NON_POOLING || process.env.DATABASE_URL || null;
 
-  // If a pooled URL is provided, try using pooled client first.
-  if (pooledUrl) {
-    connectionPromise = (async () => {
+  const connectWithDirect = async (url: string) => {
+    await closeActiveHandles();
+    const client = createClient({ connectionString: url });
+    await client.connect();
+    activeClient = client;
+    sql = ((strings, ...values) => client.sql(strings, ...values)) as SqlExecutor;
+  };
+
+  connectionPromise = (async () => {
+    if (pooledUrl) {
       try {
-        // Quick probe to verify if the pooled URL is actually pooled
-        await pooledSql`SELECT 1;`;
-        sql = pooledSql; // good to use pooled
-      } catch (err) {
-        // If the pooled URL is actually a direct (non-pooled) string, fall back to createClient
-        if (isInvalidConnStringError(err)) {
-          const client = createClient({ connectionString: pooledUrl });
-          sql = client.sql;
-          await client.connect();
-        } else {
+        await closeActiveHandles();
+        const pool = createPool({ connectionString: pooledUrl });
+        try {
+          await pool.sql`SELECT 1;`;
+        } catch (err) {
+          await pool.end().catch(() => undefined);
           throw err;
         }
+        activePool = pool;
+        sql = ((strings, ...values) =>
+          pool.sql(strings, ...values)) as SqlExecutor;
+        return;
+      } catch (err) {
+        if (!isInvalidConnStringError(err)) {
+          throw err;
+        }
+        const fallbackUrl = directUrl ?? pooledUrl;
+        await connectWithDirect(fallbackUrl);
+        return;
       }
-    })();
-    try {
-      await connectionPromise;
-    } catch (err) {
-      connectionPromise = null;
-      throw err;
     }
-    return;
-  }
 
-  // Otherwise, if a non-pooled URL is provided, use a direct client
-  if (directUrl) {
-    connectionPromise = (async () => {
-      const client = createClient({ connectionString: directUrl });
-      sql = client.sql;
-      await client.connect();
-    })();
-    try {
-      await connectionPromise;
-    } catch (err) {
-      connectionPromise = null;
-      throw err;
+    if (directUrl) {
+      await connectWithDirect(directUrl);
+      return;
     }
-    return;
-  }
 
-  // No URLs provided — let ensureDatabase surface a clear error
+    // No URLs provided — let ensureDatabase surface a clear error
+  })();
+
+  try {
+    await connectionPromise;
+  } catch (err) {
+    await resetConnectionState();
+    throw err;
+  }
 }
 
 async function createTables() {
@@ -132,16 +195,32 @@ export async function ensureDatabase() {
       "Missing Postgres connection string. Set POSTGRES_URL, POSTGRES_URL_NON_POOLING, VERCEL_POSTGRES_URL, or DATABASE_URL in .env.local."
     );
   }
-  if (initialized) return;
   try {
     await ensureClientConnection();
   } catch (err) {
     // Allow retries if the first connection attempt fails (e.g. DB starts slowly)
-    connectionPromise = null;
+    await resetConnectionState();
     throw err;
   }
-  await createTables();
-  initialized = true;
+
+  if (!initialized) {
+    await createTables();
+    initialized = true;
+    return;
+  }
+
+  // For direct connections, proactively ensure the connection is still alive.
+  if (activeClient) {
+    try {
+      await sql`SELECT 1;`;
+    } catch (err) {
+      if (!shouldResetForError(err)) {
+        throw err;
+      }
+      await resetConnectionState();
+      await ensureDatabase();
+    }
+  }
 }
 
 export { sql };

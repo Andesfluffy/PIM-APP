@@ -8,7 +8,6 @@ import ConfirmDialog from "./ConfirmDialog";
 
 type ContactsProps = {
   userId?: string;
-  onBackToDashboard: () => void;
 };
 
 type ContactErrors = {
@@ -17,7 +16,7 @@ type ContactErrors = {
   phone?: string;
 };
 
-const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
+const Contacts = ({ userId }: ContactsProps) => {
   const { contacts, createContact, updateContact, deleteContact } =
     useContacts(userId);
   const [isCreating, setIsCreating] = useState(false);
@@ -375,15 +374,6 @@ const Contacts = ({ userId, onBackToDashboard }: ContactsProps) => {
           </div>
         </div>
       )}
-
-      <div className="mt-6">
-        <button
-          onClick={onBackToDashboard}
-          className="type-subtle text-sm font-semibold text-oxford-blue-400 transition-colors hover:text-red-crayola-500"
-        >
-          ← Back to dashboard
-        </button>
-      </div>
 
       <ConfirmDialog
         isOpen={!!contactToDelete}
