@@ -4,23 +4,55 @@ let sql = pooledSql;
 let initialized = false;
 let connectionPromise: Promise<void> | null = null;
 
+function isInvalidConnStringError(err: unknown) {
+  const msg = (err as any)?.message || String(err);
+  return typeof msg === "string" && msg.includes("invalid_connection_string");
+}
+
 async function ensureClientConnection() {
-  if (process.env.POSTGRES_URL) {
+  // If we're already connecting/connected, wait for it
+  if (connectionPromise) {
+    await connectionPromise;
     return;
   }
 
-  const connectionString = process.env.POSTGRES_URL_NON_POOLING;
-  if (!connectionString) {
+  const pooledUrl = process.env.POSTGRES_URL;
+  const directUrl = process.env.POSTGRES_URL_NON_POOLING;
+
+  // If a pooled URL is provided, try using pooled client first.
+  if (pooledUrl) {
+    connectionPromise = (async () => {
+      try {
+        // Quick probe to verify if the pooled URL is actually pooled
+        await pooledSql`SELECT 1;`;
+        sql = pooledSql; // good to use pooled
+      } catch (err) {
+        // If the pooled URL is actually a direct (non-pooled) string, fall back to createClient
+        if (isInvalidConnStringError(err)) {
+          const client = createClient({ connectionString: pooledUrl });
+          sql = client.sql;
+          await client.connect();
+        } else {
+          throw err;
+        }
+      }
+    })();
+    await connectionPromise;
     return;
   }
 
-  if (!connectionPromise) {
-    const client = createClient({ connectionString });
-    sql = client.sql;
-    connectionPromise = client.connect();
+  // Otherwise, if a non-pooled URL is provided, use a direct client
+  if (directUrl) {
+    connectionPromise = (async () => {
+      const client = createClient({ connectionString: directUrl });
+      sql = client.sql;
+      await client.connect();
+    })();
+    await connectionPromise;
+    return;
   }
 
-  await connectionPromise;
+  // No URLs provided — let ensureDatabase surface a clear error
 }
 
 async function createTables() {
