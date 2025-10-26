@@ -62,15 +62,23 @@ const Contacts = ({ userId }: ContactsProps) => {
   const validateForm = () => {
     const errors: ContactErrors = {};
     const sanitized = sanitizeContactInput(newContact);
+    const hasEmail = Boolean(sanitized.email);
+    const hasPhone = Boolean(sanitized.phone);
 
     if (!sanitized.name) {
       errors.name = "Please add the contact's name.";
     }
-    if (!isValidEmail(sanitized.email)) {
-      errors.email = "Enter a valid email address.";
-    }
-    if (!isValidPhone(sanitized.phone)) {
-      errors.phone = "Use 7 to 11 digits without letters.";
+    if (!hasEmail && !hasPhone) {
+      const message = "Add at least an email address or phone number.";
+      errors.email = message;
+      errors.phone = message;
+    } else {
+      if (hasEmail && !isValidEmail(sanitized.email)) {
+        errors.email = "Enter a valid email address.";
+      }
+      if (hasPhone && !isValidPhone(sanitized.phone)) {
+        errors.phone = "Use 7 to 11 digits without letters.";
+      }
     }
     setFormErrors(errors);
     return errors;
@@ -84,11 +92,13 @@ const Contacts = ({ userId }: ContactsProps) => {
     }
 
     const sanitized = sanitizeContactInput(newContact);
+    const hasEmail = Boolean(sanitized.email);
+    const hasPhone = Boolean(sanitized.phone);
 
     createContact({
       name: sanitized.name,
-      email: sanitized.email,
-      phone: sanitized.phone || undefined,
+      email: hasEmail ? sanitized.email : null,
+      phone: hasPhone ? sanitized.phone : null,
     });
     resetForm();
   };
@@ -102,11 +112,13 @@ const Contacts = ({ userId }: ContactsProps) => {
     }
 
     const sanitized = sanitizeContactInput(newContact);
+    const hasEmail = Boolean(sanitized.email);
+    const hasPhone = Boolean(sanitized.phone);
 
     updateContact(editingContact.id, {
       name: sanitized.name,
-      email: sanitized.email,
-      phone: sanitized.phone || undefined,
+      email: hasEmail ? sanitized.email : null,
+      phone: hasPhone ? sanitized.phone : null,
     });
     resetForm();
   };
@@ -115,7 +127,7 @@ const Contacts = ({ userId }: ContactsProps) => {
     setEditingContact(contact);
     setNewContact({
       name: contact.name,
-      email: contact.email,
+      email: contact.email ?? "",
       phone: clampPhoneDigits(contact.phone),
     });
     setFormErrors({});
@@ -127,8 +139,8 @@ const Contacts = ({ userId }: ContactsProps) => {
     return contacts.filter(
       (contact) =>
         contact.name.toLowerCase().includes(q) ||
-        contact.email.toLowerCase().includes(q) ||
-        (contact.phone && contact.phone.toLowerCase().includes(q))
+        (contact.email?.toLowerCase().includes(q) ?? false) ||
+        (contact.phone ? contact.phone.toLowerCase().includes(q) : false)
     );
   }, [contacts, searchTerm]);
 
@@ -237,8 +249,21 @@ const Contacts = ({ userId }: ContactsProps) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   setNewContact((prev) => ({ ...prev, email: value }));
-                  if (formErrors.email && isValidEmail(value)) {
-                    setFormErrors((prev) => ({ ...prev, email: undefined }));
+                  if (formErrors.email || formErrors.phone) {
+                    const sanitized = sanitizeContactInput({ ...newContact, email: value });
+                    const hasEmail = Boolean(sanitized.email);
+                    const hasPhone = Boolean(sanitized.phone);
+                    const emailValid = hasEmail && isValidEmail(sanitized.email);
+
+                    if (formErrors.email) {
+                      if (emailValid || (!hasEmail && hasPhone)) {
+                        setFormErrors((prev) => ({ ...prev, email: undefined }));
+                      }
+                    }
+
+                    if (formErrors.phone && emailValid) {
+                      setFormErrors((prev) => ({ ...prev, phone: undefined }));
+                    }
                   }
                 }}
                 pattern={CONTACT_EMAIL_REGEX.source}
@@ -264,8 +289,21 @@ const Contacts = ({ userId }: ContactsProps) => {
                 onChange={(e) => {
                   const value = clampPhoneDigits(e.target.value);
                   setNewContact((prev) => ({ ...prev, phone: value }));
-                  if (formErrors.phone && isValidPhone(value)) {
-                    setFormErrors((prev) => ({ ...prev, phone: undefined }));
+                  if (formErrors.phone || formErrors.email) {
+                    const sanitized = sanitizeContactInput({ ...newContact, phone: value });
+                    const hasEmail = Boolean(sanitized.email);
+                    const hasPhone = Boolean(sanitized.phone);
+                    const phoneValid = hasPhone ? isValidPhone(value) : true;
+
+                    if (formErrors.phone) {
+                      if ((hasPhone && phoneValid) || (!hasPhone && hasEmail)) {
+                        setFormErrors((prev) => ({ ...prev, phone: undefined }));
+                      }
+                    }
+
+                    if (formErrors.email && hasPhone && phoneValid && !hasEmail) {
+                      setFormErrors((prev) => ({ ...prev, email: undefined }));
+                    }
                   }
                 }}
                 inputMode="tel"
@@ -321,7 +359,9 @@ const Contacts = ({ userId }: ContactsProps) => {
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="space-y-2">
                 <h3 className="text-lg font-semibold text-oxford-blue-500">{contact.name}</h3>
-                <p className="type-subtle text-sm text-charcoal-500/90">{contact.email}</p>
+                <p className="type-subtle text-sm text-charcoal-500/90">
+                  {contact.email ?? "No email provided"}
+                </p>
                 {contact.phone && (
                   <p className="type-subtle text-sm text-oxford-blue-400">{contact.phone}</p>
                 )}
@@ -395,7 +435,7 @@ const Contacts = ({ userId }: ContactsProps) => {
                     </span>
                   </div>
                   <div className="type-subtle mt-1 text-xs text-charcoal-500/90">
-                    <span>{contact.email}</span>
+                    <span>{contact.email ?? "No email provided"}</span>
                     {contact.phone && <span className="ml-2 text-oxford-blue-400">• {contact.phone}</span>}
                   </div>
                 </div>
@@ -483,7 +523,9 @@ const Contacts = ({ userId }: ContactsProps) => {
           <div className="space-y-3 text-sm text-charcoal-500">
             <div className="rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5">
               <p className="text-xs uppercase tracking-[0.25em] text-charcoal-400">Email</p>
-              <p className="mt-1 font-medium text-oxford-blue-500">{selectedContact.email}</p>
+              <p className="mt-1 font-medium text-oxford-blue-500">
+                {selectedContact.email ?? "No email provided"}
+              </p>
             </div>
             {selectedContact.phone && (
               <div className="rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5">

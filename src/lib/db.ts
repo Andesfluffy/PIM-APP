@@ -147,11 +147,16 @@ async function createTables() {
       id TEXT PRIMARY KEY,
       user_id TEXT NOT NULL,
       name TEXT NOT NULL,
-      email TEXT NOT NULL,
+      email TEXT,
       phone TEXT,
       created_at TIMESTAMPTZ NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL
     );
+  `;
+
+  await sql`
+    ALTER TABLE contacts
+    ALTER COLUMN email DROP NOT NULL;
   `;
 
   await sql`

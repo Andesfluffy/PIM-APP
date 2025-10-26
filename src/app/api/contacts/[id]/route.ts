@@ -28,6 +28,7 @@ export async function PUT(
 ) {
   try {
     const { uid } = await verifyAuth(req);
+    const { id } = await params;
     const body = await req.json();
     const hasName = Object.prototype.hasOwnProperty.call(body, "name");
     const hasEmail = Object.prototype.hasOwnProperty.call(body, "email");
@@ -38,22 +39,40 @@ export async function PUT(
       return NextResponse.json({ error: "Name is required" }, { status: 400 });
     }
 
-    if (hasEmail && !sanitized.email) {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
-
     if (sanitized.email && !isValidEmail(sanitized.email)) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    if (hasPhone && !isValidPhone(sanitized.phone)) {
+    if (sanitized.phone && !isValidPhone(sanitized.phone)) {
       return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
     }
 
-    const { id } = await params;
+    const existing = await findContact(id, uid);
+    if (!existing) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    const nextEmail = hasEmail
+      ? sanitized.email
+        ? sanitized.email
+        : null
+      : existing.email;
+    const nextPhone = hasPhone
+      ? sanitized.phone
+        ? sanitized.phone
+        : null
+      : existing.phone;
+
+    if (!nextEmail && !nextPhone) {
+      return NextResponse.json(
+        { error: "Provide an email address or phone number" },
+        { status: 400 }
+      );
+    }
+
     const updated = await updateContactRecord(id, {
-      name: sanitized.name || undefined,
-      email: sanitized.email || undefined,
+      name: hasName ? sanitized.name : undefined,
+      email: hasEmail ? (sanitized.email ? sanitized.email : null) : undefined,
       phone: hasPhone ? (sanitized.phone ? sanitized.phone : null) : undefined,
     }, uid);
     if (!updated) {

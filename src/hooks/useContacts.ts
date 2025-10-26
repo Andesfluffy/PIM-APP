@@ -82,8 +82,8 @@ import { useEffect, useState } from "react";
 export interface Contact {
   id: string;
   name: string;
-  email: string;
-  phone?: string;
+  email: string | null;
+  phone: string | null;
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -108,6 +108,8 @@ export function useContacts(userId: string | undefined) {
             list.map((c: any) => ({
               id: c._id,
               ...c,
+              phone: c.phone ?? null,
+              email: c.email ?? null,
             }))
           );
         })
@@ -140,6 +142,8 @@ export function useContacts(userId: string | undefined) {
             list.map((c: any) => ({
               id: c._id,
               ...c,
+              phone: c.phone ?? null,
+              email: c.email ?? null,
             }))
           );
         })
@@ -157,8 +161,8 @@ export function useContacts(userId: string | undefined) {
     const tempContact: Contact = {
       id: tempId,
       name: contact.name,
-      email: contact.email,
-      phone: contact.phone,
+      email: contact.email ?? null,
+      phone: contact.phone ?? null,
       createdAt: nowIso,
       updatedAt: nowIso,
       userId: userId || "",
@@ -176,7 +180,16 @@ export function useContacts(userId: string | undefined) {
       if (!res.ok) throw new Error(`Failed to create contact: ${res.status}`);
       const newContact = await res.json();
       setContacts((prev) =>
-        prev.map((c) => (c.id === tempId ? { id: newContact._id, ...newContact } : c))
+        prev.map((c) =>
+          c.id === tempId
+            ? {
+                id: newContact._id,
+                ...newContact,
+                email: newContact.email ?? null,
+                phone: newContact.phone ?? null,
+              }
+            : c
+        )
       );
     } catch (err) {
       console.error(err);
