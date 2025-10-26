@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
 import ConfirmDialog from "./ConfirmDialog";
+import Modal from "./Modal";
 
 type ContactsProps = {
   userId?: string;
@@ -40,6 +41,7 @@ const Contacts = ({ userId }: ContactsProps) => {
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [contactToDelete, setContactToDelete] = useState<Contact | null>(null);
   const [formErrors, setFormErrors] = useState<ContactErrors>({});
+  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
   // Persist view mode selection
   useEffect(() => {
@@ -173,11 +175,11 @@ const Contacts = ({ userId }: ContactsProps) => {
         </div>
       </div>
 
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <label className="sr-only" htmlFor="contact-search">
           Search contacts
         </label>
-        <div className="relative">
+        <div className="relative w-full sm:max-w-md">
           <input
             id="contact-search"
             type="text"
@@ -305,7 +307,16 @@ const Contacts = ({ userId }: ContactsProps) => {
             key={contact.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
+            onClick={() => setSelectedContact(contact)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setSelectedContact(contact);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            className="group cursor-pointer rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-crayola-300"
           >
             <div className="mb-4 flex items-start justify-between gap-4">
               <div className="space-y-2">
@@ -317,14 +328,22 @@ const Contacts = ({ userId }: ContactsProps) => {
               </div>
               <div className="flex gap-2 text-lg">
                 <button
-                  onClick={() => startEdit(contact)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedContact(null);
+                    startEdit(contact);
+                  }}
                   className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
                   aria-label="Edit contact"
                 >
                   ✏️
                 </button>
                 <button
-                  onClick={() => setContactToDelete(contact)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedContact(null);
+                    setContactToDelete(contact);
+                  }}
                   className="flex h-9 w-9 items-center justify-center rounded-xl bg-naples-yellow-900 text-oxford-blue-500 transition-all hover:bg-naples-yellow-800"
                   aria-label="Delete contact"
                 >
@@ -357,7 +376,16 @@ const Contacts = ({ userId }: ContactsProps) => {
             {filteredContacts.map((contact) => (
               <div
                 key={contact.id}
-                className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+                onClick={() => setSelectedContact(contact)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedContact(contact);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className="flex cursor-pointer flex-col gap-3 px-4 py-3 transition-colors duration-150 hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-crayola-300 sm:flex-row sm:items-center sm:gap-4"
               >
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
@@ -373,13 +401,21 @@ const Contacts = ({ userId }: ContactsProps) => {
                 </div>
                 <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap sm:items-center sm:justify-end">
                   <button
-                    onClick={() => startEdit(contact)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedContact(null);
+                      startEdit(contact);
+                    }}
                     className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => setContactToDelete(contact)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedContact(null);
+                      setContactToDelete(contact);
+                    }}
                     className="flex-1 rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800 sm:flex-none"
                   >
                     Delete
@@ -416,6 +452,54 @@ const Contacts = ({ userId }: ContactsProps) => {
         message={alertMsg || ""}
         onClose={() => setAlertMsg(null)}
       />
+
+      <Modal
+        isOpen={!!selectedContact}
+        title={selectedContact?.name}
+        onClose={() => setSelectedContact(null)}
+        actions={
+          selectedContact && (
+            <>
+              <button
+                onClick={() => setSelectedContact(null)}
+                className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-sm font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  startEdit(selectedContact);
+                  setSelectedContact(null);
+                }}
+                className="rounded-xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-4 py-2 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
+              >
+                Edit contact
+              </button>
+            </>
+          )
+        }
+      >
+        {selectedContact && (
+          <div className="space-y-3 text-sm text-charcoal-500">
+            <div className="rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5">
+              <p className="text-xs uppercase tracking-[0.25em] text-charcoal-400">Email</p>
+              <p className="mt-1 font-medium text-oxford-blue-500">{selectedContact.email}</p>
+            </div>
+            {selectedContact.phone && (
+              <div className="rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5">
+                <p className="text-xs uppercase tracking-[0.25em] text-charcoal-400">Phone</p>
+                <p className="mt-1 font-medium text-oxford-blue-500">{selectedContact.phone}</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-2 rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5 text-xs text-charcoal-400">
+              <span>Added {new Date(selectedContact.createdAt).toLocaleString()}</span>
+              {selectedContact.updatedAt && (
+                <span>Updated {new Date(selectedContact.updatedAt).toLocaleString()}</span>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
