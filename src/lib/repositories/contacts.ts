@@ -5,7 +5,7 @@ type ContactRow = {
   id: string;
   user_id: string;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   created_at: Date;
   updated_at: Date;
@@ -15,7 +15,7 @@ export type Contact = {
   _id: string;
   userId: string;
   name: string;
-  email: string;
+  email: string | null;
   phone: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -62,7 +62,7 @@ export async function findContact(id: string, userId?: string) {
 export async function createContact(data: {
   userId: string;
   name: string;
-  email: string;
+  email: string | null;
   phone?: string | null;
 }) {
   await ensureDatabase();
@@ -83,21 +83,25 @@ export async function updateContact(
 ) {
   await ensureDatabase();
   const now = new Date();
+  const nameProvided = Object.prototype.hasOwnProperty.call(updates, "name");
+  const emailProvided = Object.prototype.hasOwnProperty.call(updates, "email");
+  const phoneProvided = Object.prototype.hasOwnProperty.call(updates, "phone");
+
   const result = userId
     ? await sql<ContactRow>`
         UPDATE contacts
-        SET name = COALESCE(${updates.name ?? null}, name),
-            email = COALESCE(${updates.email ?? null}, email),
-            phone = COALESCE(${updates.phone ?? null}, phone),
+        SET name = CASE WHEN ${nameProvided} THEN ${updates.name ?? null} ELSE name END,
+            email = CASE WHEN ${emailProvided} THEN ${updates.email ?? null} ELSE email END,
+            phone = CASE WHEN ${phoneProvided} THEN ${updates.phone ?? null} ELSE phone END,
             updated_at = ${now}
         WHERE id = ${id} AND user_id = ${userId}
         RETURNING *;
       `
     : await sql<ContactRow>`
         UPDATE contacts
-        SET name = COALESCE(${updates.name ?? null}, name),
-            email = COALESCE(${updates.email ?? null}, email),
-            phone = COALESCE(${updates.phone ?? null}, phone),
+        SET name = CASE WHEN ${nameProvided} THEN ${updates.name ?? null} ELSE name END,
+            email = CASE WHEN ${emailProvided} THEN ${updates.email ?? null} ELSE email END,
+            phone = CASE WHEN ${phoneProvided} THEN ${updates.phone ?? null} ELSE phone END,
             updated_at = ${now}
         WHERE id = ${id}
         RETURNING *;

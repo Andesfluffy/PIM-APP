@@ -43,22 +43,34 @@ export async function POST(req: NextRequest) {
     const { uid } = await verifyAuth(req);
     const { name, email, phone } = await req.json();
     const sanitized = sanitizeContactInput({ name, email, phone });
-    if (!sanitized.name || !sanitized.email)
-      return NextResponse.json({ error: "Missing fields" }, { status: 400 });
 
-    if (!isValidEmail(sanitized.email)) {
+    if (!sanitized.name) {
+      return NextResponse.json({ error: "Name is required" }, { status: 400 });
+    }
+
+    const hasEmail = Boolean(sanitized.email);
+    const hasPhone = Boolean(sanitized.phone);
+
+    if (!hasEmail && !hasPhone) {
+      return NextResponse.json(
+        { error: "Provide an email address or phone number" },
+        { status: 400 }
+      );
+    }
+
+    if (hasEmail && !isValidEmail(sanitized.email)) {
       return NextResponse.json({ error: "Invalid email" }, { status: 400 });
     }
 
-    if (!isValidPhone(sanitized.phone)) {
+    if (hasPhone && !isValidPhone(sanitized.phone)) {
       return NextResponse.json({ error: "Invalid phone" }, { status: 400 });
     }
 
     const contact = await createContact({
       userId: uid,
       name: sanitized.name,
-      email: sanitized.email,
-      phone: sanitized.phone || null,
+      email: hasEmail ? sanitized.email : null,
+      phone: hasPhone ? sanitized.phone : null,
     });
     return NextResponse.json(contact, { status: 201 });
   } catch (err: any) {
