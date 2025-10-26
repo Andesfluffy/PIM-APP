@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import AlertDialog from "./AlertDialog";
 import ConfirmDialog from "./ConfirmDialog";
+import Modal from "./Modal";
 
 type TasksProps = {
   userId?: string;
@@ -30,6 +31,8 @@ const Tasks = ({ userId }: TasksProps) => {
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [formErrors, setFormErrors] = useState<TaskErrors>({});
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
   // Persist view mode selection
   useEffect(() => {
@@ -119,10 +122,18 @@ const Tasks = ({ userId }: TasksProps) => {
     updateTask(task.id, { status });
   };
 
-  const filteredTasks = useMemo(
-    () => tasks.filter((task) => (filter === "all" ? true : task.status === filter)),
-    [tasks, filter]
-  );
+  const filteredTasks = useMemo(() => {
+    const normalizedTerm = searchTerm.toLowerCase();
+    return tasks
+      .filter((task) => (filter === "all" ? true : task.status === filter))
+      .filter((task) => {
+        if (!normalizedTerm) return true;
+        return (
+          task.title.toLowerCase().includes(normalizedTerm) ||
+          task.description.toLowerCase().includes(normalizedTerm)
+        );
+      });
+  }, [filter, searchTerm, tasks]);
 
   const getStatusBadge = (status: Task["status"]) => {
     switch (status) {
@@ -191,20 +202,36 @@ const Tasks = ({ userId }: TasksProps) => {
         </div>
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
-        {(["all", "pending", "completed"] as const).map((filterType) => (
-          <button
-            key={filterType}
-            onClick={() => setFilter(filterType)}
-            className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-crayola-200 ${
-              filter === filterType
-                ? "bg-red-crayola-500 text-white shadow-[0_15px_30px_-20px_rgba(237,37,78,0.35)]"
-                : "border border-tea-green-700 bg-white/80 text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
-            }`}
-          >
-            {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
-          </button>
-        ))}
+      <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap gap-2">
+          {(["all", "pending", "completed"] as const).map((filterType) => (
+            <button
+              key={filterType}
+              onClick={() => setFilter(filterType)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-crayola-200 ${
+                filter === filterType
+                  ? "bg-red-crayola-500 text-white shadow-[0_15px_30px_-20px_rgba(237,37,78,0.35)]"
+                  : "border border-tea-green-700 bg-white/80 text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+              }`}
+            >
+              {filterType.charAt(0).toUpperCase() + filterType.slice(1)}
+            </button>
+          ))}
+        </div>
+        <label className="sr-only" htmlFor="task-search">
+          Search tasks
+        </label>
+        <div className="relative w-full lg:max-w-md">
+          <input
+            id="task-search"
+            type="text"
+            placeholder="Search tasks by title or detail"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            className="w-full rounded-2xl border border-tea-green-700 bg-white/75 px-5 py-3 text-sm text-oxford-blue-500 shadow-inner shadow-charcoal-900/10 placeholder:text-charcoal-400 focus:border-red-crayola-400 focus:outline-none focus:ring-2 focus:ring-red-crayola-200"
+          />
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-charcoal-400">🔍</span>
+        </div>
       </div>
 
       {isCreating && (
@@ -328,7 +355,16 @@ const Tasks = ({ userId }: TasksProps) => {
             key={task.id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)]"
+            onClick={() => setSelectedTask(task)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                setSelectedTask(task);
+              }
+            }}
+            role="button"
+            tabIndex={0}
+            className="group cursor-pointer rounded-2xl border border-tea-green-700 bg-white/90 p-5 shadow-sm shadow-charcoal-900/20 transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_20px_35px_-30px_rgba(1,25,54,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-crayola-300"
           >
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-2">
@@ -357,19 +393,31 @@ const Tasks = ({ userId }: TasksProps) => {
 
             <div className="mt-4 flex flex-wrap items-center gap-3">
               <button
-                onClick={() => updateStatus(task, task.status === "completed" ? "pending" : "completed")}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedTask(null);
+                  updateStatus(task, task.status === "completed" ? "pending" : "completed");
+                }}
                 className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
               >
                 Mark as {task.status === "completed" ? "pending" : "completed"}
               </button>
               <button
-                onClick={() => startEdit(task)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedTask(null);
+                  startEdit(task);
+                }}
                 className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
               >
                 Edit
               </button>
               <button
-                onClick={() => setTaskToDelete(task)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setSelectedTask(null);
+                  setTaskToDelete(task);
+                }}
                 className="rounded-xl border border-transparent bg-naples-yellow-900 px-4 py-2 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800"
               >
                 Delete
@@ -392,17 +440,31 @@ const Tasks = ({ userId }: TasksProps) => {
         <div className="max-h-[420px] overflow-y-auto pr-1">
           <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
             {filteredTasks.map((task) => (
-              <div key={task.id} className="flex items-center gap-4 px-4 py-3">
+              <div
+                key={task.id}
+                onClick={() => setSelectedTask(task)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedTask(task);
+                  }
+                }}
+                role="button"
+                tabIndex={0}
+                className="flex cursor-pointer flex-col gap-3 px-4 py-3 transition-colors duration-150 hover:bg-white/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-crayola-300 sm:flex-row sm:items-center sm:gap-4"
+              >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                       <span className={`inline-flex items-center gap-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getPriorityBadge(task.priority)}`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
                         {task.priority}
                       </span>
                       <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{task.title}</h3>
                     </div>
-                    <div className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadge(task.status)}`}>
+                    <div
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadge(task.status)} text-left sm:text-right`}
+                    >
                       {task.status === "completed" ? "Completed" : "In progress"}
                     </div>
                   </div>
@@ -414,22 +476,34 @@ const Tasks = ({ userId }: TasksProps) => {
                     {task.dueDate && <span>• Due {new Date(task.dueDate).toLocaleDateString()}</span>}
                   </div>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap sm:items-center sm:justify-end">
                   <button
-                    onClick={() => updateStatus(task, task.status === "completed" ? "pending" : "completed")}
-                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedTask(null);
+                      updateStatus(task, task.status === "completed" ? "pending" : "completed");
+                    }}
+                    className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     {task.status === "completed" ? "Mark pending" : "Mark completed"}
                   </button>
                   <button
-                    onClick={() => startEdit(task)}
-                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedTask(null);
+                      startEdit(task);
+                    }}
+                    className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => setTaskToDelete(task)}
-                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setSelectedTask(null);
+                      setTaskToDelete(task);
+                    }}
+                    className="flex-1 rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800 sm:flex-none"
                   >
                     Delete
                   </button>
@@ -465,6 +539,58 @@ const Tasks = ({ userId }: TasksProps) => {
         message={alertMsg || ""}
         onClose={() => setAlertMsg(null)}
       />
+
+      <Modal
+        isOpen={!!selectedTask}
+        title={selectedTask?.title}
+        onClose={() => setSelectedTask(null)}
+        actions={
+          selectedTask && (
+            <>
+              <button
+                onClick={() => setSelectedTask(null)}
+                className="rounded-xl border border-tea-green-700 bg-white/85 px-4 py-2 text-sm font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  startEdit(selectedTask);
+                  setSelectedTask(null);
+                }}
+                className="rounded-xl bg-gradient-to-r from-red-crayola-500 via-naples-yellow-400 to-tea-green-400 px-4 py-2 text-sm font-semibold text-oxford-blue-500 shadow-[0_18px_36px_-20px_rgba(1,25,54,0.35)] transition-transform duration-200 hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-red-crayola-200"
+              >
+                Edit task
+              </button>
+            </>
+          )
+        }
+      >
+        {selectedTask && (
+          <div className="space-y-4 text-sm text-charcoal-500">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-oxford-blue-400">
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] normal-case ${getPriorityBadge(selectedTask.priority)}`}>
+                <span className="h-2 w-2 rounded-full bg-white/80" />
+                {selectedTask.priority} priority
+              </span>
+              <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] normal-case ${getStatusBadge(selectedTask.status)}`}>
+                {selectedTask.status === "completed" ? "Completed" : "In progress"}
+              </span>
+            </div>
+            {selectedTask.description && (
+              <div className="rounded-2xl bg-white/80 p-4 shadow-inner shadow-charcoal-900/5">
+                <p className="whitespace-pre-wrap leading-relaxed text-oxford-blue-500">{selectedTask.description}</p>
+              </div>
+            )}
+            <div className="flex flex-col gap-2 text-xs text-charcoal-400">
+              <span>Updated {new Date(selectedTask.updatedAt ?? selectedTask.createdAt).toLocaleString()}</span>
+              {selectedTask.dueDate && (
+                <span>Due {new Date(selectedTask.dueDate).toLocaleString()}</span>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
