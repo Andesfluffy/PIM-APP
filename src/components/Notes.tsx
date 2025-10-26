@@ -295,24 +295,29 @@ const Notes = ({ userId }: NotesProps) => {
         <div className="max-h-[420px] overflow-y-auto pr-1">
           <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
             {filteredNotes.map((note) => (
-              <div key={note.id} className="flex items-center gap-4 px-4 py-3">
+              <div
+                key={note.id}
+                className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+              >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
                     <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{note.title}</h3>
-                    <span className="shrink-0 text-xs text-charcoal-400">{new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
+                    <span className="shrink-0 text-left text-xs text-charcoal-400 sm:text-right">
+                      {new Date(note.updatedAt || note.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                   <p className="type-subtle mt-1 line-clamp-1 text-xs text-charcoal-500/90">{note.content}</p>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap sm:items-center sm:justify-end">
                   <button
                     onClick={() => startEdit(note)}
-                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                    className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setNoteToDelete(note)}
-                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                    className="flex-1 rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800 sm:flex-none"
                   >
                     Delete
                   </button>

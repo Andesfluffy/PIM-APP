@@ -392,17 +392,22 @@ const Tasks = ({ userId }: TasksProps) => {
         <div className="max-h-[420px] overflow-y-auto pr-1">
           <div className="divide-y divide-tea-green-700 rounded-2xl border border-tea-green-700 bg-white/90">
             {filteredTasks.map((task) => (
-              <div key={task.id} className="flex items-center gap-4 px-4 py-3">
+              <div
+                key={task.id}
+                className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4"
+              >
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
                       <span className={`inline-flex items-center gap-2 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getPriorityBadge(task.priority)}`}>
                         <span className="h-1.5 w-1.5 rounded-full bg-white/80" />
                         {task.priority}
                       </span>
                       <h3 className="truncate text-sm font-semibold text-oxford-blue-500">{task.title}</h3>
                     </div>
-                    <div className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadge(task.status)}`}>
+                    <div
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${getStatusBadge(task.status)} text-left sm:text-right`}
+                    >
                       {task.status === "completed" ? "Completed" : "In progress"}
                     </div>
                   </div>
@@ -414,22 +419,22 @@ const Tasks = ({ userId }: TasksProps) => {
                     {task.dueDate && <span>• Due {new Date(task.dueDate).toLocaleDateString()}</span>}
                   </div>
                 </div>
-                <div className="flex shrink-0 gap-2">
+                <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:flex-nowrap sm:items-center sm:justify-end">
                   <button
                     onClick={() => updateStatus(task, task.status === "completed" ? "pending" : "completed")}
-                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                    className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     {task.status === "completed" ? "Mark pending" : "Mark completed"}
                   </button>
                   <button
                     onClick={() => startEdit(task)}
-                    className="rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 hover:border-red-crayola-400 hover:text-red-crayola-500"
+                    className="flex-1 rounded-lg border border-tea-green-700 px-3 py-1 text-xs font-semibold text-oxford-blue-400 transition-colors hover:border-red-crayola-400 hover:text-red-crayola-500 sm:flex-none"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => setTaskToDelete(task)}
-                    className="rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 hover:bg-naples-yellow-800"
+                    className="flex-1 rounded-lg bg-naples-yellow-900 px-3 py-1 text-xs font-semibold text-oxford-blue-500 transition-colors hover:bg-naples-yellow-800 sm:flex-none"
                   >
                     Delete
                   </button>
